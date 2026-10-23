@@ -1,69 +1,81 @@
-<img align="right" width="150" alt="logo" src="https://user-images.githubusercontent.com/5889006/190859553-5b229b4f-c476-4cbd-928f-890f5265ca4c.png">
+# 去看花海的路上 · Huanhe 的博客
 
-# Hugo Theme Stack Starter Template
+个人博客的源码仓库。
 
-This is a quick start template for [Hugo theme Stack](https://github.com/CaiJimmy/hugo-theme-stack). It uses [Hugo modules](https://gohugo.io/hugo-modules/) feature to load the theme.
+- 线上地址：<https://huanhe.site>
+- 内容方向：学习记录、生活随笔、考研路上的碎碎念
 
-It comes with a basic theme structure and configuration. GitHub action has been set up to deploy the theme to a public GitHub page automatically. Also, there's a cron job to update the theme automatically everyday.
+## 技术栈
 
-## Get started
+| 部分 | 说明 |
+|---|---|
+| 生成器 | [Hugo](https://gohugo.io/) extended 0.149.0 |
+| 主题 | [Hugo Theme Stack](https://github.com/CaiJimmy/hugo-theme-stack) v3.31（通过 Hugo Modules 引入） |
+| 自定义外观 | `assets/scss/custom.scss`：薄暮花海渐变背景、玻璃拟态卡片、衬线标题、渐变胶囊等 |
+| 模板覆盖 | `layouts/partials/`：回到顶部按钮、主题色、iOS 图标、去掉 Google Fonts 请求 |
+| 部署 | 自写的增量部署脚本：本地/远端 MD5 对比，只上传有变化的文件 |
 
-1. Click *Use this template*, and create your repository as `<username>.github.io` on GitHub.
-![Step 1](https://user-images.githubusercontent.com/5889006/156916624-20b2a784-f3a9-4718-aa5f-ce2a436b241f.png)
+## 本地开发
 
-2. Once the repository is created, create a GitHub codespace associated with it.
-![Create codespace](https://user-images.githubusercontent.com/5889006/156916672-43b7b6e9-4ffb-4704-b4ba-d5ca40ffcae7.png)
-
-3. And voila! You're ready to go. The codespace has been configured with the latest version of Hugo extended, just run `hugo server` in the terminal and see your new site in action.
-
-4. Check `config` folder for the configuration files. You can edit them to suit your needs. Make sure to update the `baseurl` property in `config/_default/config.toml` to your site's URL.
-
-5. Open Settings -> Pages. Change the build branch from `master` to `gh-pages`.
-![Build](https://github.com/namanh11611/hugo-theme-stack-starter/assets/16586200/12c763cd-bead-4923-b610-8788f388fcb5)
-
-6. Once you're done editing the site, just commit it and push it. GitHub action will deploy the site automatically to GitHub page asociated with the repository.
-![GitHub action](https://user-images.githubusercontent.com/5889006/156916881-90b8bb9b-1925-4e60-9d7a-8026cda729bf.png)
-
----
-
-In case you don't want to use GitHub codespace, you can also run this template in your local machine. **You need to install Git, Go and Hugo extended locally.**
-
-## Update theme manually
-
-Run:
+前置：Hugo extended、Git。
 
 ```bash
-hugo mod get -u github.com/CaiJimmy/hugo-theme-stack/v3
-hugo mod tidy
+cd my-blog
+hugo server --disableFastRender
 ```
 
-> This starter template has been configured with `v3` version of theme. Due to the limitation of Go module, once the `v4` or up version of theme is released, you need to update the theme manually. (Modifying `config/module.toml` file)
+打开 <http://localhost:1313> 预览，保存文件后自动刷新。
 
-## Deploy to another static page hostings
+## 写文章
 
-If you want to build this site using another static page hosting, you need to make sure they have Go installed in the machine. 
+在 `content/post/<目录名>/index.md` 新建文章，front matter 示例：
 
-<details>
-  <summary>Vercel</summary>
-  
-You need to overwrite build command to install manually Go:
-
-```
-amazon-linux-extras install golang1.11 && hugo --gc --minify
-```
-
-![](https://user-images.githubusercontent.com/5889006/156917172-01e4d418-3469-4ffb-97e4-a905d28b8424.png)
-
-If you are using Node.js 20, you need to overwrite the install command to install manually Go:
-
-```
-dnf install -y golang
+```yaml
+---
+title: 标题
+description: 一句话摘要（会显示在首页卡片和搜索结果）
+slug: english-slug
+image: cover.webp        # 可选：把封面图命名为 cover.webp 放进同一目录
+date: 2026-10-23
+categories:
+    - 生活随笔
+tags:
+    - 个人成长
+---
 ```
 
-![image](https://github.com/zhi-yi-huang/hugo-theme-stack-starter/assets/83860323/777c1109-dfc8-4893-9db7-1305ec027cf5)
+正文里 `##` / `###` 小标题会自动生成右侧目录。
 
+## 部署
 
-Make sure also to specify Hugo version in the environment variable `HUGO_VERSION` (Use the latest version of Hugo extended):
+推荐双击 `publish.bat`：**提交 + 推送 GitHub + 构建部署** 一次完成。
 
-![Environment variable](https://user-images.githubusercontent.com/5889006/156917212-afb7c70d-ab85-480f-8288-b15781a462c0.png)
-</details>
+也可以分开：
+
+- `deploy-blog.bat`：只做部署（增量上传；`-DryRun` 可预览差异、`-Full` 全量重传、`-NoDelete` 不删多余文件）
+- 手动 git：`git add -A && git commit -m "..." && git push`
+
+部署脚本原理：hugo 构建 → 本地文件算 MD5 → ssh 读取服务器文件 MD5 → 只传差异 → 修权限 → 内容校验。
+服务器根目录的 `.user.ini` / `.htaccess` / `.well-known` 等文件受保护，不会被删除。
+
+## 目录结构
+
+```
+.
+├── assets/            # 自定义 SCSS 与图片（头像等）
+├── config/_default/   # 站点配置：config / params / menu / module / markup / permalinks
+├── content/           # 文章与页面
+│   ├── post/          # 文章
+│   └── page/          # 归档、搜索、关于
+├── layouts/           # 覆盖主题的局部模板
+├── static/            # 原样输出的文件（favicon、分享图等）
+├── deploy-blog.ps1    # 增量部署脚本（deploy-blog.bat 是双击入口）
+├── publish.bat        # 一键发布：提交 + 推送 + 部署
+└── guide.md           # 本地开发/部署速查
+```
+
+## 说明
+
+- `public/`、`resources/` 是构建产物与缓存，不提交到仓库。
+- 主题通过 Hugo Modules 引入，升级主题后建议本地预览确认自定义样式仍然正常。
+- 文章内容采用 CC BY-NC-SA 4.0 授权（见站点文章页脚）。
