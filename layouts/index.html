@@ -7,12 +7,12 @@
     <div class="hero-bg" aria-hidden="true">
         <div class="hero-bg-layer hero-bg-sharp">
             {{- range $index, $slide := .slides -}}
-                <div class="hero-slide{{ if eq $index 0 }} is-active{{ end }}" style="background-image: url('{{ $slide.src | relURL }}');"></div>
+                <div class="hero-slide{{ if eq $index 0 }} is-active{{ end }}" data-src="{{ $slide.src | relURL }}"></div>
             {{- end -}}
         </div>
         <div class="hero-bg-layer hero-bg-blur">
             {{- range $index, $slide := .slides -}}
-                <div class="hero-slide{{ if eq $index 0 }} is-active{{ end }}" style="background-image: url('{{ $slide.src | relURL }}');"></div>
+                <div class="hero-slide{{ if eq $index 0 }} is-active{{ end }}" data-src="{{ $slide.src | relURL }}"></div>
             {{- end -}}
         </div>
         <div class="hero-tint"></div>
@@ -67,15 +67,32 @@
         ];
         var slideInterval = {{ default 6500 .interval }};
 
+        function ensureSlideImage(el) {
+            if (!el || el.style.backgroundImage) { return; }
+            var src = el.getAttribute('data-src');
+            if (src) { el.style.backgroundImage = "url('" + src + "')"; }
+        }
+
+        function preloadSlide(el) {
+            if (!el) { return; }
+            var src = el.getAttribute('data-src');
+            if (src) {
+                var img = new Image();
+                img.src = src;
+            }
+        }
+
         function setActiveSlide(index) {
             slideGroups.forEach(function (group) {
                 Array.prototype.forEach.call(group, function (el, i) {
                     if (i === index) {
+                        ensureSlideImage(el);
                         el.classList.add('is-active');
                     } else {
                         el.classList.remove('is-active');
                     }
                 });
+                preloadSlide(group[(index + 1) % group.length]);
             });
         }
 

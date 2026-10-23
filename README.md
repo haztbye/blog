@@ -121,15 +121,6 @@ author = "署名"        # 没有出处就省略这一行
 
 每次打开/刷新首页，会**随机选一张照片和一个语录起点**，然后按歌单顺序继续轮换。
 
-## 音乐页
-
-- 页面：`/music/`（`content/page/music/index.md` + `layouts/page/music.html`）
-- 播放器：APlayer（CDN 加载），歌单数据来自 `static/meting/api.php`
-- 改歌单：编辑 `config/_default/params.toml` 里的 `[music] playlist_id`（网易云歌单 ID，需公开）
-- 只播放**非 VIP** 曲目：VIP 歌曲没有会员身份无法在线播放，页面会单独列出并给出「在网易云听」链接
-- 音频走网易云 CDN，不经过本站服务器，不消耗服务器带宽
-- PHP 接口只允许 `/meting/` 目录执行（nginx vhost 已限制），其它 `.php` 返回 404
-
 ## 说明
 
 - `public/`、`resources/` 是构建产物与缓存，不提交到仓库。
