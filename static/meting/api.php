@@ -2,14 +2,18 @@
 /**
  * 极简 Meting 风格接口：网易云歌单 -> APlayer 音频列表
  *
- * 用法：/meting/api.php?type=playlist&id=<网易云歌单ID>&limit=100
- * 返回：[{ name, artist, url, cover }, ...]
+ * 用法：/meting/api.php?type=playlist&id=<网易云歌单ID>&limit=200
+ *
+ * 返回：
+ *   成功：{ name, cover, url, trackCount, tracks: [{ id, name, artist, url, cover, vip }, ...] }
+ *   失败：{ error: "...", detail: "..." }   （HTTP 仍是 200，便于前端统一处理）
  *
  * 说明：
  *  - 音频地址使用网易云官方外链接口（/song/media/outer/url），浏览器直接拉流，
  *    不经过本站服务器，因此不消耗本站带宽。
  *  - 结果缓存 10 分钟，减少对网易云的请求。
- *  - 只筛选可免费播放的曲目（fee=1 的 VIP 歌曲会被跳过，避免播放失败）。
+ *  - VIP 歌曲（fee=1）没有会员身份时无法播放，因此带 vip 标记返回，
+ *    前端只把可播放的曲目交给播放器，VIP 曲目单独列出并提供网易云链接。
  */
 
 declare(strict_types=1);
@@ -20,10 +24,9 @@ header('Cache-Control: public, max-age=600');
 
 $type  = isset($_GET['type']) ? (string) $_GET['type'] : 'playlist';
 $id    = isset($_GET['id']) ? preg_replace('/\D/', '', (string) $_GET['id']) : '';
-$limit = isset($_GET['limit']) ? max(1, min(500, (int) $_GET['limit'])) : 100;
+$limit = isset($_GET['limit']) ? max(1, min(1000, (int) $_GET['limit'])) : 200;
 
 if ($type !== 'playlist' || $id === '') {
-    http_response_code(400);
     echo json_encode(['error' => 'usage: ?type=playlist&id=PLAYLIST_ID'], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -41,7 +44,6 @@ $ch = curl_init($apiUrl);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT        => 15,
-    CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_HTTPHEADER     => [
         'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         'Referer: https://music.163.com/',
@@ -52,27 +54,32 @@ $httpCode = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 curl_close($ch);
 
 if ($raw === false || $httpCode !== 200) {
-    http_response_code(502);
-    echo json_encode(['error' => 'upstream request failed', 'http' => $httpCode], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['error' => 'upstream request failed', 'detail' => 'HTTP ' . $httpCode], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 $data = json_decode($raw, true);
-$tracks = $data['playlist']['tracks'] ?? [];
+$code = isset($data['code']) ? (int) $data['code'] : 0;
+
+if ($code !== 200 || empty($data['playlist'])) {
+    echo json_encode([
+        'error'  => 'playlist not accessible',
+        'detail' => (string) ($data['message'] ?? $data['msg'] ?? ('code ' . $code)),
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$playlist = $data['playlist'];
+$tracks   = $playlist['tracks'] ?? [];
 
 $items = [];
-$seen = [];
+$seen  = [];
 foreach ($tracks as $track) {
     if (count($items) >= $limit) {
         break;
     }
     $songId = isset($track['id']) ? (string) $track['id'] : '';
     if ($songId === '' || isset($seen[$songId])) {
-        continue;
-    }
-    // fee: 0 免费 / 1 VIP / 4 付费专辑 / 8 免费（试听）
-    $fee = array_key_exists('fee', $track) ? (int) $track['fee'] : 0;
-    if ($fee === 1) {
         continue;
     }
     $seen[$songId] = true;
@@ -99,16 +106,28 @@ foreach ($tracks as $track) {
         $cover = (string) $track['album']['picUrl'];
     }
 
+    // fee: 0 免费 / 1 VIP / 4 付费专辑 / 8 免费（含试听）
+    $fee = array_key_exists('fee', $track) ? (int) $track['fee'] : 0;
+
     $items[] = [
         'id'     => $songId,
         'name'   => (string) ($track['name'] ?? ''),
         'artist' => implode(' / ', $artists),
         'url'    => 'https://music.163.com/song/media/outer/url?id=' . $songId . '.mp3',
         'cover'  => $cover,
+        'vip'    => ($fee === 1),
     ];
 }
 
-$json = json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$result = [
+    'name'       => (string) ($playlist['name'] ?? ''),
+    'cover'      => (string) ($playlist['coverImgUrl'] ?? ''),
+    'url'        => 'https://music.163.com/#/playlist?id=' . $id,
+    'trackCount' => count($items),
+    'tracks'     => $items,
+];
+
+$json = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 if (!is_dir($cacheDir)) {
     @mkdir($cacheDir, 0755, true);

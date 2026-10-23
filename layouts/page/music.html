@@ -7,11 +7,25 @@
         {{ with .Params.description }}<p class="music-desc">{{ . }}</p>{{ end }}
     </header>
 
+    <div class="music-meta" id="music-meta" hidden>
+        <img class="music-meta-cover" id="music-meta-cover" src="" alt="" loading="lazy">
+        <div class="music-meta-text">
+            <p class="music-meta-name" id="music-meta-name"></p>
+            <p class="music-meta-count" id="music-meta-count"></p>
+        </div>
+        <a class="music-meta-link" id="music-meta-link" href="#" target="_blank" rel="noopener">在网易云打开 ↗</a>
+    </div>
+
     <div class="music-player-wrap">
         <div id="aplayer"></div>
     </div>
 
-    <p class="music-hint">歌单来自网易云音乐 · 点击播放</p>
+    <div class="music-vip" id="music-vip" hidden>
+        <p class="music-vip-title"></p>
+        <ul class="music-vip-list" id="music-vip-list"></ul>
+    </div>
+
+    <p class="music-hint" id="music-hint">歌单来自网易云音乐 · 点击播放</p>
 </section>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
@@ -19,11 +33,18 @@
 <script>
 (function () {
     var container = document.getElementById('aplayer');
+    var hint = document.getElementById('music-hint');
+    var meta = document.getElementById('music-meta');
+    var vipBox = document.getElementById('music-vip');
     var api = {{ (default "/meting/api.php" .Site.Params.music.api) | jsonify }};
     var playlistId = {{ (default "" .Site.Params.music.playlist_id) | jsonify }};
 
+    function setHint(text) {
+        hint.textContent = text;
+    }
+
     if (!playlistId) {
-        container.innerHTML = '<p class="music-hint">歌单还没配置：在 params.toml 的 [music] 里填上 playlist_id</p>';
+        setHint('歌单还没配置：在 params.toml 的 [music] 里填上 playlist_id');
         return;
     }
 
@@ -32,23 +53,82 @@
             if (!resp.ok) { throw new Error('HTTP ' + resp.status); }
             return resp.json();
         })
-        .then(function (list) {
-            if (!Array.isArray(list) || list.length === 0) {
-                throw new Error('empty playlist');
+        .then(function (data) {
+            if (!data || data.error || !data.tracks) {
+                var detail = data && data.detail ? '（' + data.detail + '）' : '';
+                setHint('歌单暂时不可访问' + detail + '，可能被设置为私密。');
+                return;
             }
-            window.musicPlayer = new APlayer({
-                container: container,
-                audio: list,
-                listFolded: false,
-                listMaxHeight: '430px',
-                lrcType: 0,
-                preload: 'none',
-                mutex: true,
-                theme: '#7b68ee'
+
+            var tracks = data.tracks;
+            var free = [];
+            var vip = [];
+            tracks.forEach(function (track) {
+                if (track.vip) { vip.push(track); } else { free.push(track); }
             });
+
+            if (data.name) {
+                meta.hidden = false;
+                document.getElementById('music-meta-name').textContent = data.name;
+                document.getElementById('music-meta-count').textContent =
+                    '共 ' + tracks.length + ' 首 · 可在线播放 ' + free.length + ' 首';
+                document.getElementById('music-meta-cover').src = data.cover || '';
+                var link = document.getElementById('music-meta-link');
+                link.href = data.url || ('https://music.163.com/#/playlist?id=' + playlistId);
+            }
+
+            if (free.length > 0) {
+                new APlayer({
+                    container: container,
+                    audio: free.map(function (track) {
+                        return {
+                            name: track.name,
+                            artist: track.artist,
+                            url: track.url,
+                            cover: track.cover
+                        };
+                    }),
+                    listFolded: false,
+                    listMaxHeight: '430px',
+                    lrcType: 0,
+                    preload: 'none',
+                    mutex: true,
+                    theme: '#7b68ee'
+                });
+                setHint('歌单来自网易云音乐 · 点击播放');
+            } else {
+                document.querySelector('.music-player-wrap').style.display = 'none';
+                if (vip.length > 0) {
+                    setHint('这个歌单里的歌都是 VIP 专属，暂时无法在网页里播放，可以点下面在网易云听。');
+                } else {
+                    setHint('这个歌单是空的。');
+                }
+            }
+
+            if (vip.length > 0) {
+                vipBox.hidden = false;
+                vipBox.querySelector('.music-vip-title').textContent =
+                    'VIP 专属（' + vip.length + ' 首，需登录网易云会员播放）';
+                var list = document.getElementById('music-vip-list');
+                vip.slice(0, 30).forEach(function (track) {
+                    var li = document.createElement('li');
+                    var a = document.createElement('a');
+                    a.href = 'https://music.163.com/#/song?id=' + track.id;
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    a.textContent = track.name + (track.artist ? ' — ' + track.artist : '');
+                    li.appendChild(a);
+                    list.appendChild(li);
+                });
+                if (vip.length > 30) {
+                    var more = document.createElement('li');
+                    more.textContent = '… 还有 ' + (vip.length - 30) + ' 首';
+                    list.appendChild(more);
+                }
+            }
         })
         .catch(function () {
-            container.innerHTML = '<p class="music-hint">歌单加载失败，稍后再试</p>';
+            setHint('歌单加载失败，稍后再试。');
         });
 }());
 </script>

@@ -2297,3 +2297,104 @@ body.template-music .main-container {
         font-size: 1.3rem;
     }
 }
+
+/* 音乐页：歌单信息条 / VIP 列表 */
+.music-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    border-radius: 18px;
+    background-color: var(--tw-glass-bg);
+    -webkit-backdrop-filter: var(--tw-glass-blur);
+    backdrop-filter: var(--tw-glass-blur);
+    border: 1px solid var(--tw-glass-border);
+}
+
+.music-meta[hidden] {
+    display: none;
+}
+
+.music-meta-cover {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.music-meta-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.music-meta-name {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--card-text-color-main);
+}
+
+.music-meta-count {
+    margin: 4px 0 0;
+    font-size: 1.2rem;
+    color: var(--card-text-color-tertiary);
+}
+
+.music-meta-link {
+    font-size: 1.22rem;
+    color: var(--accent-color);
+    white-space: nowrap;
+}
+
+.music-vip {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background-color: var(--tw-glass-bg);
+    -webkit-backdrop-filter: var(--tw-glass-blur);
+    backdrop-filter: var(--tw-glass-blur);
+    border: 1px solid var(--tw-glass-border);
+}
+
+.music-vip[hidden] {
+    display: none;
+}
+
+.music-vip-title {
+    margin: 0 0 10px;
+    font-size: 1.3rem;
+    letter-spacing: 0.04em;
+    color: var(--card-text-color-secondary);
+}
+
+.music-vip-list {
+    margin: 0;
+    padding-left: 18px;
+    columns: 2;
+    column-gap: 24px;
+    font-size: 1.26rem;
+    line-height: 2;
+}
+
+.music-vip-list li {
+    break-inside: avoid;
+    color: var(--card-text-color-tertiary);
+}
+
+.music-vip-list a {
+    color: var(--card-text-color-secondary);
+}
+
+.music-vip-list a:hover {
+    color: var(--accent-color);
+}
+
+@media (max-width: 760px) {
+    .music-meta {
+        flex-wrap: wrap;
+    }
+
+    .music-vip-list {
+        columns: 1;
+    }
+}
