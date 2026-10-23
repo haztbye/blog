@@ -167,46 +167,46 @@ hold_ms = 5000
 delete_speed = 45
 
 [[hero.slides]]
-src = "/img/hero/slide-1.jpg"
+src = "/img/hero/slide-1.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-2.jpg"
+src = "/img/hero/slide-2.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-3.jpg"
+src = "/img/hero/slide-3.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-4.jpg"
+src = "/img/hero/slide-4.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-5.jpg"
+src = "/img/hero/slide-5.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-6.jpg"
+src = "/img/hero/slide-6.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-7.jpg"
+src = "/img/hero/slide-7.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-8.jpg"
+src = "/img/hero/slide-8.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-9.jpg"
+src = "/img/hero/slide-9.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-10.jpg"
+src = "/img/hero/slide-10.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-11.jpg"
+src = "/img/hero/slide-11.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-12.jpg"
+src = "/img/hero/slide-12.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-13.jpg"
+src = "/img/hero/slide-13.webp"
 
 [[hero.slides]]
-src = "/img/hero/slide-14.jpg"
+src = "/img/hero/slide-14.webp"
 
 [[hero.quotes]]
 text = "凡心所向，素履以往；生如逆旅，一苇以航。"
