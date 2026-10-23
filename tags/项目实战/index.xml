@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>项目实战 on Huanhe</title><link>https://huanhe.site/tags/%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98/</link><description>Recent content in 项目实战 on Huanhe</description><generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 01 Oct 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://huanhe.site/tags/%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98/index.xml" rel="self" type="application/rss+xml"/><item><title>2025年十月到十二月学习计划</title><link>https://huanhe.site/p/2025-q4-plan/</link><pubDate>Wed, 01 Oct 2025 00:00:00 +0000</pubDate><guid>https://huanhe.site/p/2025-q4-plan/</guid><description>&lt;img src="https://huanhe.site/p/2025-q4-plan/cover.webp" alt="Featured image of post 2025年十月到十二月学习计划" /&gt;&lt;p&gt;加油呀！！！！窝要加油变强💪&lt;/p&gt;
+&lt;h2 id="-十月夯实基础"&gt;📅 十月：夯实基础
+&lt;/h2&gt;&lt;h3 id="国庆假期929---101"&gt;国庆假期（9.29 - 10.1）
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;没离职海尔的时候&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;JSON格式处理&lt;/li&gt;
+&lt;li&gt;SMTP邮件发送&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;设计模式学习&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;多线程&lt;/li&gt;
+&lt;li&gt;单例模式&lt;/li&gt;
+&lt;li&gt;工厂模式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Python3内置库深入&lt;/strong&gt;：
+&lt;ul&gt;
+&lt;li&gt;MongoDB, urllib, pip&lt;/li&gt;
+&lt;li&gt;operator, math, requests, random&lt;/li&gt;
+&lt;li&gt;OpenAI, statistics, hashlib&lt;/li&gt;
+&lt;li&gt;pyecharts, sys, pickle, subprocess&lt;/li&gt;
+&lt;li&gt;queue, StringIO, logging&lt;/li&gt;
+&lt;li&gt;datetime, re, csv&lt;/li&gt;
+&lt;li&gt;threading, asyncio（没学完，都只是看了个皮毛🥲后面用到再补）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;假期期间&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;个人网站搭建（就是现在这个博客！）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="国庆假后"&gt;国庆假后
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;核心学习内容&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Python基础巩固&lt;/li&gt;
+&lt;li&gt;OOP编程&lt;/li&gt;
+&lt;li&gt;SQL数据库&lt;/li&gt;
+&lt;li&gt;Pandas, NumPy, Matplotlib&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;三个实战项目&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;学生成绩管理系统（面向过程版）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;学生成绩管理系统（OOP重构版）&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kaggle数据集分析&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;选择基础数据集&lt;/li&gt;
+&lt;li&gt;数据探索与清洗&lt;/li&gt;
+&lt;li&gt;可视化分析&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id="十一月深入ai"&gt;十一月：深入AI
+&lt;/h2&gt;&lt;h3 id="主要学习内容"&gt;主要学习内容
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;大模型课程深入学习&lt;/li&gt;
+&lt;li&gt;RAG技术栈&lt;/li&gt;
+&lt;li&gt;检索算法&lt;/li&gt;
+&lt;li&gt;LoRA微调&lt;/li&gt;
+&lt;li&gt;深度学习复习&lt;/li&gt;
+&lt;li&gt;机器学习复习&lt;/li&gt;
+&lt;li&gt;强化学习入门&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="实践要求"&gt;实践要求
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;手写复现课程代码&lt;/li&gt;
+&lt;li&gt;理解每个算法原理&lt;/li&gt;
+&lt;li&gt;做好笔记和总结&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="多线程实践"&gt;多线程实践
+&lt;/h3&gt;&lt;p&gt;在RAG项目中，尝试用多线程并行处理多个文件向量化&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="十二月学习企业的开发方法和思想"&gt;十二月：学习企业的开发方法和思想
+&lt;/h2&gt;&lt;h3 id="学习内容"&gt;学习内容
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Linux基础&lt;/li&gt;
+&lt;li&gt;Docker基础&lt;/li&gt;
+&lt;li&gt;Web编程基础&lt;/li&gt;
+&lt;li&gt;Elasticsearch基础&lt;/li&gt;
+&lt;li&gt;HTTP协议&lt;/li&gt;
+&lt;li&gt;RESTful API（FastAPI）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="核心项目智能电影推荐系统"&gt;核心项目：智能电影推荐系统
+&lt;/h3&gt;&lt;p&gt;这个项目将串联所有技术点：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;技术栈应用&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Web编程（FastAPI）&lt;/strong&gt; - 后端API服务&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;GET /search?q=科幻&lt;/code&gt;：接收搜索关键词，返回相关电影&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;POST /recommend&lt;/code&gt;：接收用户喜欢的电影ID，返回推荐列表&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Elasticsearch&lt;/strong&gt; - 搜索引擎&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;导入电影数据（标题、简介、演员等）&lt;/li&gt;
+&lt;li&gt;快速检索，替代慢速数据库查询&lt;/li&gt;
+&lt;li&gt;支持全文搜索和相关性排序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;机器学习模型&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pandas处理电影数据&lt;/li&gt;
+&lt;li&gt;Scikit-learn训练协同过滤推荐模型&lt;/li&gt;
+&lt;li&gt;FastAPI调用模型提供推荐服务&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Docker&lt;/strong&gt; - 容器化部署&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;编写Dockerfile，定义环境依赖&lt;/li&gt;
+&lt;li&gt;docker-compose一键启动FastAPI + ES&lt;/li&gt;
+&lt;li&gt;确保跨平台一致运行&lt;/li&gt;
+&lt;li&gt;便于云服务器部署&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;解决的实际问题&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;问题：Docker、Web编程、ES这些在实践中怎么应用？&lt;br&gt;
+答案：通过这个智能电影推荐系统，将所有技术点串联起来，形成完整的应用。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="代码管理"&gt;代码管理
+&lt;/h3&gt;&lt;p&gt;将所有代码上传到GitHub并分类整理&lt;/p&gt;
+&lt;h3 id="多线程实践-1"&gt;多线程实践
+&lt;/h3&gt;&lt;p&gt;在Web服务项目中，用线程池处理并发请求&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="一月重构"&gt;一月：重构
+&lt;/h2&gt;&lt;h3 id="核心任务"&gt;核心任务
+&lt;/h3&gt;&lt;p&gt;重构之前在幂律做的合同抽取系统&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用企业级开发规范&lt;/li&gt;
+&lt;li&gt;代码模块化、可维护&lt;/li&gt;
+&lt;li&gt;添加完整的文档&lt;/li&gt;
+&lt;li&gt;Docker容器化部署&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="多线程实践-2"&gt;多线程实践
+&lt;/h3&gt;&lt;p&gt;多线程并行处理多个合同文件，提升处理效率&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;路漫漫其修远兮，吾将上下而求索。&lt;/strong&gt;&lt;/p&gt;</description></item></channel></rss>
