@@ -1601,8 +1601,120 @@ body .container.main-container {
 }
 
 /* ==========================================================================
-   12. 首页全屏 Hero：照片轮播 + 站名 + 语录
+   12. 首页全屏 Hero：照片直接当整页背景 + 下滑渐进模糊
    ========================================================================== */
+
+/* 首页关掉站点背景（渐变 / 花瓣 / 极光），只留照片 */
+body.home::before,
+body.home::after {
+    content: none;
+}
+
+body.home .main-container::before,
+body.home .main-container::after {
+    content: none;
+}
+
+/* 固定背景层：铺满整页，滚动时保持不动 */
+.hero-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+    background-color: #0b0918;
+}
+
+.hero-bg-layer {
+    position: absolute;
+    inset: 0;
+}
+
+.hero-slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transform: scale(1.06);
+    transition: opacity 1.8s ease, transform 16s linear;
+}
+
+.hero-slide.is-active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* 模糊副本：模糊是静态的，滚动只过渡透明度（性能友好） */
+.hero-bg-blur {
+    opacity: 0;
+    filter: blur(30px) saturate(112%);
+    transform: scale(1.12);
+    animation: hero-blur-in linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 80vh;
+}
+
+.hero-bg-blur .hero-slide {
+    transform: scale(1.03);
+}
+
+.hero-bg-blur .hero-slide.is-active {
+    transform: scale(1);
+}
+
+/* 压暗层：保证 Hero 文案可读；滚动后叠加“磨砂”色，颜色跟随明暗主题 */
+.hero-tint {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(62% 48% at 50% 44%, rgba(10, 8, 26, 0.54) 0%, rgba(10, 8, 26, 0.22) 48%, rgba(10, 8, 26, 0) 78%),
+        linear-gradient(180deg, rgba(10, 8, 26, 0.46) 0%, rgba(10, 8, 26, 0.08) 30%, rgba(10, 8, 26, 0) 58%, rgba(10, 8, 26, 0.34) 100%);
+}
+
+.hero-tint::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(250, 247, 255, 0.74);
+    opacity: 0;
+    animation: hero-veil-in linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 80vh;
+}
+
+[data-scheme="dark"] .hero-tint::after {
+    background-color: rgba(8, 6, 20, 0.62);
+}
+
+@keyframes hero-blur-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes hero-veil-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 不支持滚动时间轴时：直接显示模糊态，保证内容可读 */
+@supports not (animation-timeline: scroll()) {
+    .hero-bg-blur {
+        opacity: 1;
+    }
+
+    .hero-tint::after {
+        opacity: 1;
+    }
+}
 
 .hero {
     position: relative;
@@ -1613,40 +1725,7 @@ body .container.main-container {
     min-height: 100vh;
     min-height: 100svh;
     padding: 120px 24px 96px;
-    overflow: hidden;
-    isolation: isolate;
     scroll-margin-top: 0;
-}
-
-.hero-media {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-}
-
-.hero-slide {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    opacity: 0;
-    transform: scale(1.08);
-    transition: opacity 1.8s ease, transform 14s linear;
-}
-
-.hero-slide.is-active {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.hero-scrim {
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(64% 50% at 50% 46%, rgba(10, 8, 26, 0.5) 0%, rgba(10, 8, 26, 0.24) 46%, rgba(10, 8, 26, 0) 76%),
-        radial-gradient(120% 80% at 50% 32%, rgba(10, 8, 26, 0) 0%, rgba(10, 8, 26, 0.3) 66%, rgba(10, 8, 26, 0.55) 100%),
-        linear-gradient(180deg, rgba(10, 8, 26, 0.5) 0%, rgba(10, 8, 26, 0.08) 32%, rgba(10, 8, 26, 0) 64%, rgba(10, 8, 26, 0.25) 100%);
 }
 
 .hero-content {
@@ -1771,13 +1850,13 @@ body .container.main-container {
     }
 }
 
-/* 滚动时 Hero 内容淡出（支持滚动时间轴的浏览器） */
+/* 滚动时 Hero 文案淡出（支持滚动时间轴的浏览器） */
 @supports (animation-timeline: scroll()) {
     .hero-content,
     .hero-scroll {
         animation: hero-exit linear both;
         animation-timeline: scroll(root block);
-        animation-range: 0 62vh;
+        animation-range: 0 58vh;
     }
 
     @keyframes hero-exit {
@@ -1986,6 +2065,10 @@ body .container.main-container {
 
     .hero {
         padding: 104px 18px 88px;
+    }
+
+    .hero-bg-blur {
+        filter: blur(18px) saturate(110%);
     }
 
     .hero-title {

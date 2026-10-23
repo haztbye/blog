@@ -174,23 +174,46 @@ src = "/img/hero/slide-3.jpg"
 [[hero.slides]]
 src = "/img/hero/slide-4.jpg"
 
-[[hero.quotes]]
-text = "去看花海的路上，愿我们都能看到属于自己的风景。"
-author = "Huanhe"
+[[hero.slides]]
+src = "/img/hero/slide-5.jpg"
 
 [[hero.quotes]]
-text = "袅袅兮秋风，洞庭波兮木叶下。"
-author = "屈原《九歌》"
+text = "凡心所向，素履以往；生如逆旅，一苇以航。"
+author = "七堇年《尘曲》"
 
 [[hero.quotes]]
-text = "慢慢走，慢慢明白。"
-author = "Huanhe"
+text = "什么都无法舍弃的人，什么也改变不了。"
+author = "《进击的巨人》"
 
 [[hero.quotes]]
-text = "那些当时觉得过不去的事，总有一天会变成故事。"
-author = "Huanhe"
+text = "天行健，君子以自强不息；地势坤，君子以厚德载物。"
+author = "《周易·象传》"
 
 [[hero.quotes]]
-text = "愿你我在各自的道路上，都能看见花海。"
-author = "Huanhe"
+text = "注定会成功，仅此而已。"
+
+[[hero.quotes]]
+text = "男儿不展凌云志，空负天生八尺躯。"
+
+[[hero.quotes]]
+text = "要成为绝世高手，并非一朝一夕。"
+
+[[hero.quotes]]
+text = "积土而为山，积水而为海。"
+author = "《荀子·儒效》"
+
+[[hero.quotes]]
+text = "温柔正确的人总是难以生存，因为这世界既不温柔，也不正确。"
+author = "《我的青春恋爱物语果然有问题》"
+
+[[hero.quotes]]
+text = "往日无法重来。"
+
+[[hero.quotes]]
+text = "且将新火试新茶，诗酒趁年华。"
+author = "苏轼《望江南·超然台作》"
+
+[[hero.quotes]]
+text = "她那时候还太年轻，不知道所有命运赠送的礼物，早已在暗中标好了价格。"
+author = "斯蒂芬·茨威格《断头王后》"
 

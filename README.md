@@ -82,7 +82,7 @@ tags:
 
 ### 换照片、改语录
 
-1. 把照片放进 `static/img/hero/`（建议 1600×900 的横图）
+1. 把照片放进 `static/img/hero/`（建议 1920×1080 横图，命名 `slide-1.jpg` 起，按顺序轮播）
 2. 在 `params.toml` 里改/加：
 
 ```toml
@@ -91,10 +91,12 @@ src = "/img/hero/slide-1.jpg"
 
 [[hero.quotes]]
 text = "想写的话"
-author = "署名"
+author = "署名"        # 没有出处就省略这一行
 ```
 
 整体开关是 `[hero]` 下的 `enable`，切换间隔是 `interval`（毫秒）。
+
+首页背景行为：照片固定铺满整页，向下滚动时背景逐渐**模糊 + 磨砂**（浅色主题磨砂白、深色主题暗玻璃），滚回顶部恢复清晰。实现见 `custom.scss` 的 `.hero-bg-blur` / `.hero-tint`。
 
 ## 说明
 
