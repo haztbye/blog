@@ -96,7 +96,7 @@ hugo server
 
 ### 换照片、改语录
 
-1. 把照片放进 `static/img/hero/`（建议 1920×1080 横图，命名 `slide-1.jpg` 起，按顺序轮播）
+1. 把照片放进 `static/img/hero/`（建议 **WebP、1600×900** 横图，命名 `slide-1.webp` 起，按顺序轮播）
 2. 在 `params.toml` 里改/加：
 
 ```toml

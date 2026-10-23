@@ -47,6 +47,17 @@ git push
 - 节奏参数：`interval`（照片轮换）、`type_speed`（打字）、`hold_ms`（停留）、`delete_speed`（逐字删除），单位毫秒
 - 文章网格：`assets/scss/custom.scss` 里的 `.article-grid`
 
+## 服务器 nginx 配置说明
+
+`huanhe.site` 的站点配置（`/www/server/panel/vhost/nginx/huanhe.site.conf`）里手动加过两处优化，**不在 git 里**：
+
+- 图片/图标/字体缓存 30 天；带内容指纹的 JS/CSS 缓存 1 年（`immutable`）
+- `gzip_comp_level 5`（全局 gzip 已开，这里提高压缩级别）
+
+改动前的备份在 `/www/server/panel/vhost/nginx/huanhe.site.conf.bak.*`。
+
+⚠️ 在宝塔面板里"保存"站点设置可能会覆盖这些改动；如果发现 CSS/JS 的缓存头变回 12h，说一声重新加即可。
+
 ## 目录说明
 
 - `content/`：文章与页面（`post/` 文章，`page/` 归档/搜索/关于）
