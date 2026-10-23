@@ -251,7 +251,7 @@ ssh-copy-id username@server_ip
 
 ### 服务器信息
 
-- **公网IP**：180.184.31.150
+- **公网IP**：your-server-ip
 - **用户名**：root
 - **初始密码**：（当时好像是连接了xshell进行连接，然后生成了初始密码？我不太确定哈）
 
@@ -277,10 +277,10 @@ ssh-keygen -t rsa -b 4096 -C "huanhe@blog" -f %USERPROFILE%\.ssh\id_rsa_blog
 
 ```bash
 # Linux/Mac
-ssh-copy-id -i ~/.ssh/id_rsa_blog.pub root@180.184.31.150
+ssh-copy-id -i ~/.ssh/id_rsa_blog.pub root@your-server-ip
 
 # Windows（需要安装OpenSSH）
-type %USERPROFILE%\.ssh\id_rsa_blog.pub | ssh root@180.184.31.150 "cat >> ~/.ssh/authorized_keys"
+type %USERPROFILE%\.ssh\id_rsa_blog.pub | ssh root@your-server-ip "cat >> ~/.ssh/authorized_keys"
 ```
 
 **ssh-copy-id 做了什么？**
@@ -294,7 +294,7 @@ type %USERPROFILE%\.ssh\id_rsa_blog.pub | ssh root@180.184.31.150 "cat >> ~/.ssh
 
 ```bash
 # 1. 首次密码登录
-ssh root@180.184.31.150
+ssh root@your-server-ip
 
 # 2. 创建SSH目录
 mkdir -p ~/.ssh
@@ -322,14 +322,14 @@ exit
 ```bash
 # 博客服务器
 Host blog
-    HostName 180.184.31.150
+    HostName your-server-ip
     User root
     Port 22
     IdentityFile ~/.ssh/id_rsa_blog
     
 # 可选：保持连接
 Host blog
-    HostName 180.184.31.150
+    HostName your-server-ip
     User root
     IdentityFile ~/.ssh/id_rsa_blog
     ServerAliveInterval 60
@@ -343,7 +343,7 @@ Host blog
 ssh blog
 
 # 第一次连接会提示确认指纹
-The authenticity of host '180.184.31.150' can't be established.
+The authenticity of host 'your-server-ip' can't be established.
 ECDSA key fingerprint is SHA256:xxxxxx.
 Are you sure you want to continue connecting (yes/no)? yes
 
