@@ -97,8 +97,9 @@
             };
         });
 
-        var typeSpeed   = {{ default 65 .type_speed }};
-        var holdMs      = {{ default 3200 .hold_ms }};
+        var typeSpeed   = {{ default 110 .type_speed }};
+        var holdMs      = {{ default 5000 .hold_ms }};
+        var deleteSpeed = {{ default 45 .delete_speed }};
         var authorSpeed = Math.max(30, Math.round(typeSpeed * 0.7));
 
         function sleep(ms) {
@@ -119,12 +120,28 @@
             });
         }
 
+        function eraseFrom(el, speed) {
+            if (!el) { return sleep(0); }
+            return new Promise(function (resolve) {
+                (function step() {
+                    var chars = Array.from(el.textContent);
+                    if (chars.length === 0) { resolve(); return; }
+                    chars.pop();
+                    el.textContent = chars.join('');
+                    window.setTimeout(step, speed);
+                }());
+            });
+        }
+
         function runQuotes(index) {
             var item = quoteData[index];
             var next = (index + 1) % quoteData.length;
 
             if (item.textEl) { item.textEl.textContent = ''; }
-            if (item.authorEl) { item.authorEl.textContent = ''; }
+            if (item.authorEl) {
+                item.authorEl.textContent = '';
+                item.authorEl.classList.remove('is-hidden');
+            }
 
             return sleep(240)
                 .then(function () {
@@ -138,6 +155,10 @@
                     });
                 })
                 .then(function () { return sleep(holdMs); })
+                .then(function () {
+                    if (item.authorEl) { item.authorEl.classList.add('is-hidden'); }
+                    return eraseFrom(item.textEl, deleteSpeed);
+                })
                 .then(function () {
                     item.el.classList.remove('is-active');
                     return sleep(720);

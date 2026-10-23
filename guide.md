@@ -43,7 +43,8 @@ git push
 
 - 顶部胶囊导航：`layouts/partials/sidebar/left.html`
 - 首页全屏 Hero：`layouts/index.html` + `config/_default/params.toml` 的 `[hero]`
-- 照片放在 `static/img/hero/`（建议 1600×900），语录在 `params.toml` 的 `[[hero.quotes]]`
+- 照片放在 `static/img/hero/`（建议 1920×1080），语录在 `params.toml` 的 `[[hero.quotes]]`
+- 节奏参数：`interval`（照片轮换）、`type_speed`（打字）、`hold_ms`（停留）、`delete_speed`（逐字删除），单位毫秒
 - 文章网格：`assets/scss/custom.scss` 里的 `.article-grid`
 
 ## 目录说明

@@ -157,13 +157,14 @@ id = ""
 # ============================================================================
 [hero]
 enable = true
-interval = 6500
+interval = 10000
 kicker = "HUANHE'S BLOG"
 title = "huanhe"
 subtitle = "去看花海的路上"
-# 语录打字机：每个字的间隔（毫秒）、打完后停留时间（毫秒）
-type_speed = 65
-hold_ms = 3400
+# 语录打字机：每个字的间隔（毫秒）、打完后停留时间（毫秒）、逐字删除的间隔（毫秒）
+type_speed = 110
+hold_ms = 5000
+delete_speed = 45
 
 [[hero.slides]]
 src = "/img/hero/slide-1.jpg"
@@ -179,6 +180,21 @@ src = "/img/hero/slide-4.jpg"
 
 [[hero.slides]]
 src = "/img/hero/slide-5.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-6.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-7.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-8.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-9.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-10.jpg"
 
 [[hero.quotes]]
 text = "凡心所向，素履以往；生如逆旅，一苇以航。"
@@ -261,4 +277,48 @@ text = "星光不问赶路人，时光不负有心人。"
 
 [[hero.quotes]]
 text = "愿你我在各自的道路上，都能看见花海。"
+
+[[hero.quotes]]
+text = "世界以痛吻我，要我报之以歌。"
+author = "泰戈尔《飞鸟集》"
+
+[[hero.quotes]]
+text = "人生如逆旅，我亦是行人。"
+author = "苏轼《临江仙·送钱穆父》"
+
+[[hero.quotes]]
+text = "岁月不居，时节如流。"
+author = "孔融《论盛孝章书》"
+
+[[hero.quotes]]
+text = "不积跬步，无以至千里；不积小流，无以成江海。"
+author = "荀子《劝学》"
+
+[[hero.quotes]]
+text = "千磨万击还坚劲，任尔东西南北风。"
+author = "郑燮《竹石》"
+
+[[hero.quotes]]
+text = "会当凌绝顶，一览众山小。"
+author = "杜甫《望岳》"
+
+[[hero.quotes]]
+text = "长风破浪会有时，直挂云帆济沧海。"
+author = "李白《行路难·其一》"
+
+[[hero.quotes]]
+text = "海上生明月，天涯共此时。"
+author = "张九龄《望月怀远》"
+
+[[hero.quotes]]
+text = "每一个不曾起舞的日子，都是对生命的辜负。"
+author = "尼采"
+
+[[hero.quotes]]
+text = "生如夏花之绚烂，死如秋叶之静美。"
+author = "泰戈尔《飞鸟集》"
+
+[[hero.quotes]]
+text = "我来到这个世界，为了看看太阳和蓝色的地平线。"
+author = "巴尔蒙特"
 
