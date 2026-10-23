@@ -161,6 +161,9 @@ interval = 6500
 kicker = "HUANHE'S BLOG"
 title = "huanhe"
 subtitle = "去看花海的路上"
+# 语录打字机：每个字的间隔（毫秒）、打完后停留时间（毫秒）
+type_speed = 65
+hold_ms = 3400
 
 [[hero.slides]]
 src = "/img/hero/slide-1.jpg"

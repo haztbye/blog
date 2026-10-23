@@ -59,16 +59,15 @@
         }
 
         var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reduceMotion) return;
 
+        /* ---------- 背景照片轮换 ---------- */
         var slideGroups = [
             hero.querySelectorAll('.hero-bg-sharp .hero-slide'),
             hero.querySelectorAll('.hero-bg-blur .hero-slide')
         ];
-        var quotes = hero.querySelectorAll('.hero-quote');
-        var interval = {{ default 6500 .interval }};
+        var slideInterval = {{ default 6500 .interval }};
 
-        if (slideGroups[0].length > 1) {
+        if (!reduceMotion && slideGroups[0].length > 1) {
             var si = 0;
             window.setInterval(function () {
                 if (document.hidden) return;
@@ -79,17 +78,86 @@
                 slideGroups.forEach(function (group) {
                     if (group[si]) group[si].classList.add('is-active');
                 });
-            }, interval);
+            }, slideInterval);
         }
 
-        if (quotes.length > 1) {
-            var qi = 0;
-            window.setInterval(function () {
-                if (document.hidden) return;
-                quotes[qi].classList.remove('is-active');
-                qi = (qi + 1) % quotes.length;
-                quotes[qi].classList.add('is-active');
-            }, interval + 2200);
+        /* ---------- 语录：打字机效果 ---------- */
+        var quoteEls = Array.prototype.slice.call(hero.querySelectorAll('.hero-quote'));
+        if (quoteEls.length === 0) return;
+
+        var quoteData = quoteEls.map(function (el) {
+            var textEl = el.querySelector('blockquote');
+            var authorEl = el.querySelector('figcaption');
+            return {
+                el: el,
+                textEl: textEl,
+                authorEl: authorEl,
+                text: textEl ? textEl.textContent : '',
+                author: authorEl ? authorEl.textContent : ''
+            };
+        });
+
+        var typeSpeed   = {{ default 65 .type_speed }};
+        var holdMs      = {{ default 3200 .hold_ms }};
+        var authorSpeed = Math.max(30, Math.round(typeSpeed * 0.7));
+
+        function sleep(ms) {
+            return new Promise(function (resolve) { window.setTimeout(resolve, ms); });
+        }
+
+        function typeInto(el, text, speed) {
+            if (!el || !text) { return sleep(0); }
+            return new Promise(function (resolve) {
+                var chars = Array.from(text);
+                var index = 0;
+                el.textContent = '';
+                (function step() {
+                    if (index >= chars.length) { resolve(); return; }
+                    el.textContent += chars[index++];
+                    window.setTimeout(step, speed);
+                }());
+            });
+        }
+
+        function runQuotes(index) {
+            var item = quoteData[index];
+            var next = (index + 1) % quoteData.length;
+
+            if (item.textEl) { item.textEl.textContent = ''; }
+            if (item.authorEl) { item.authorEl.textContent = ''; }
+
+            return sleep(240)
+                .then(function () {
+                    item.el.classList.add('is-active');
+                    return typeInto(item.textEl, item.text, typeSpeed);
+                })
+                .then(function () {
+                    if (!item.author) { return; }
+                    return sleep(280).then(function () {
+                        return typeInto(item.authorEl, item.author, authorSpeed);
+                    });
+                })
+                .then(function () { return sleep(holdMs); })
+                .then(function () {
+                    item.el.classList.remove('is-active');
+                    return sleep(720);
+                })
+                .then(function () { return runQuotes(next); });
+        }
+
+        if (reduceMotion) {
+            /* 减少动态效果：不逐字输出，只做淡入淡出轮换 */
+            if (quoteEls.length > 1) {
+                var qi = 0;
+                window.setInterval(function () {
+                    if (document.hidden) return;
+                    quoteEls[qi].classList.remove('is-active');
+                    qi = (qi + 1) % quoteEls.length;
+                    quoteEls[qi].classList.add('is-active');
+                }, slideInterval + 2200);
+            }
+        } else {
+            runQuotes(0);
         }
     }());
     </script>
