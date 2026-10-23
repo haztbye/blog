@@ -81,9 +81,18 @@ function Invoke-RemoteListAction {
         $chunk = @($clean[$i..$end])
         $b64   = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($chunk -join "`n")))
         $remoteCmd = "cd '" + $RemotePath + "' && printf %s '" + $b64 + "' | base64 -d | xargs -d '\n' " + $ShellAction
-        & ssh -o BatchMode=yes $SshHost $remoteCmd
-        if ($LASTEXITCODE -ne 0) {
-            throw ("远端操作失败（" + $ShellAction + "）；可加 -DryRun 先预览清单")
+
+        # 偶发的 SSH 失败自动重试，最多 3 次
+        $attempt = 0
+        while ($true) {
+            $attempt++
+            & ssh -o BatchMode=yes $SshHost $remoteCmd
+            if ($LASTEXITCODE -eq 0) { break }
+            if ($attempt -ge 3) {
+                throw ("远端操作失败（" + $ShellAction + "）；可加 -DryRun 先预览清单")
+            }
+            Write-Host ("  [!] 第 " + $attempt + " 次尝试失败，2 秒后重试...") -ForegroundColor Yellow
+            Start-Sleep -Seconds 2
         }
     }
 }
