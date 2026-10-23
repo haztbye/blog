@@ -157,7 +157,7 @@ id = ""
 # ============================================================================
 [hero]
 enable = true
-interval = 10000
+interval = 7000
 kicker = "HUANHE'S BLOG"
 title = "huanhe"
 subtitle = "去看花海的路上"
