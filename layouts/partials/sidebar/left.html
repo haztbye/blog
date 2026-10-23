@@ -1,0 +1,62 @@
+{{- /*
+  顶部胶囊导航（覆盖主题原来的左侧栏）
+  保留了主题 JS 需要的 #toggle-menu / #main-menu / #dark-mode-toggle 三个节点
+*/ -}}
+<nav class="topnav" id="topnav" aria-label="主导航">
+    <div class="topnav-inner">
+        <a class="topnav-brand" href="{{ "/" | relLangURL }}">
+            {{- with .Site.Params.sidebar.avatar -}}
+                {{- if (default true .enabled) -}}
+                    {{- if .local -}}
+                        {{- with resources.Get .src -}}
+                            {{- $avatar := .Resize "96x" -}}
+                            <img class="topnav-avatar" src="{{ $avatar.RelPermalink }}" width="32" height="32" alt="{{ $.Site.Title }}" loading="lazy">
+                        {{- end -}}
+                    {{- else -}}
+                        <img class="topnav-avatar" src="{{ .src }}" width="32" height="32" alt="{{ $.Site.Title }}" loading="lazy">
+                    {{- end -}}
+                {{- end -}}
+            {{- end -}}
+            <span class="topnav-name">{{ .Site.Title }}</span>
+        </a>
+
+        <button class="hamburger hamburger--spin topnav-hamburger" type="button" id="toggle-menu" aria-label="{{ T `toggleMenu` }}">
+            <span class="hamburger-box">
+                <span class="hamburger-inner"></span>
+            </span>
+        </button>
+
+        <ol class="topnav-menu" id="main-menu">
+            {{- $currentPage := . -}}
+            {{- range .Site.Menus.main -}}
+                {{- $active := or (eq $currentPage.Title .Name) (or ($currentPage.HasMenuCurrent "main" .) ($currentPage.IsMenuCurrent "main" .)) -}}
+                <li class="{{ if $active }}current{{ end }}">
+                    <a href="{{ .URL }}" {{ if eq .Params.newTab true }}target="_blank" rel="noopener"{{ end }}>
+                        {{- with (default .Pre .Params.Icon) -}}{{ partial "helper/icon" . }}{{- end -}}
+                        <span>{{ .Name }}</span>
+                    </a>
+                </li>
+            {{- end -}}
+
+            {{- with .Site.Menus.social -}}
+                <li class="topnav-social">
+                    {{- range . -}}
+                        <a href="{{ .URL }}" {{ if eq (default true .Params.newTab) true }}target="_blank" rel="noopener me"{{ end }} title="{{ .Name }}" aria-label="{{ .Name }}">
+                            {{- with (default "link" .Params.Icon) -}}{{ partial "helper/icon" . }}{{- end -}}
+                        </a>
+                    {{- end -}}
+                </li>
+            {{- end -}}
+
+            {{- if (default false .Site.Params.colorScheme.toggle) -}}
+                <li class="topnav-actions">
+                    <button type="button" id="dark-mode-toggle" aria-label="{{ T `darkMode` }}" title="{{ T `darkMode` }}">
+                        {{ partial "helper/icon" "toggle-left" }}
+                        {{ partial "helper/icon" "toggle-right" }}
+                        <span>{{ T "darkMode" }}</span>
+                    </button>
+                </li>
+            {{- end -}}
+        </ol>
+    </div>
+</nav>

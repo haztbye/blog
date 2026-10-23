@@ -150,3 +150,47 @@ clientSecret = ""
 [comments.cusdis]
 host = ""
 id = ""
+
+# ============================================================================
+# 首页全屏 Hero（照片轮播 + 站名 + 语录）
+# 照片放在 static/img/hero/ 下，替换文件或改下面的 src 即可
+# ============================================================================
+[hero]
+enable = true
+interval = 6500
+kicker = "HUANHE'S BLOG"
+title = "huanhe"
+subtitle = "去看花海的路上"
+
+[[hero.slides]]
+src = "/img/hero/slide-1.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-2.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-3.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-4.jpg"
+
+[[hero.quotes]]
+text = "去看花海的路上，愿我们都能看到属于自己的风景。"
+author = "Huanhe"
+
+[[hero.quotes]]
+text = "袅袅兮秋风，洞庭波兮木叶下。"
+author = "屈原《九歌》"
+
+[[hero.quotes]]
+text = "慢慢走，慢慢明白。"
+author = "Huanhe"
+
+[[hero.quotes]]
+text = "那些当时觉得过不去的事，总有一天会变成故事。"
+author = "Huanhe"
+
+[[hero.quotes]]
+text = "愿你我在各自的道路上，都能看见花海。"
+author = "Huanhe"
+

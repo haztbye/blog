@@ -74,6 +74,28 @@ tags:
 └── guide.md           # 本地开发/部署速查
 ```
 
+## 首页与导航
+
+- **顶部胶囊导航**：`layouts/partials/sidebar/left.html`（覆盖主题原来的左侧栏，保留主题 JS 需要的 `#toggle-menu` / `#main-menu` / `#dark-mode-toggle`）
+- **首页全屏 Hero**（照片轮播 + 站名 + 语录）：`layouts/index.html` + `config/_default/params.toml` 里的 `[hero]`
+- **文章网格列表**：`assets/scss/custom.scss` 中的 `.article-grid`（首页 3 列 / 平板 2 列 / 手机 1 列）
+
+### 换照片、改语录
+
+1. 把照片放进 `static/img/hero/`（建议 1600×900 的横图）
+2. 在 `params.toml` 里改/加：
+
+```toml
+[[hero.slides]]
+src = "/img/hero/slide-1.jpg"
+
+[[hero.quotes]]
+text = "想写的话"
+author = "署名"
+```
+
+整体开关是 `[hero]` 下的 `enable`，切换间隔是 `interval`（毫秒）。
+
 ## 说明
 
 - `public/`、`resources/` 是构建产物与缓存，不提交到仓库。

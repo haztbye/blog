@@ -1,0 +1,110 @@
+{{ define "body-class" }}home{{ end }}
+
+{{ define "hero" }}
+{{- with .Site.Params.hero -}}
+{{- if (default true .enable) -}}
+<section class="hero" id="hero">
+    <div class="hero-media">
+        {{- range $index, $slide := .slides -}}
+            <div class="hero-slide{{ if eq $index 0 }} is-active{{ end }}" style="background-image: url('{{ $slide.src | relURL }}');"></div>
+        {{- end -}}
+        <div class="hero-scrim"></div>
+    </div>
+
+    <div class="hero-content">
+        <p class="hero-kicker">{{ default "WELCOME" .kicker }}</p>
+        <h1 class="hero-title">{{ default "huanhe" .title }}</h1>
+        <p class="hero-subtitle">{{ default $.Site.Params.sidebar.subtitle .subtitle }}</p>
+
+        {{- with .quotes -}}
+        <div class="hero-quotes">
+            {{- range $index, $quote := . -}}
+                <figure class="hero-quote{{ if eq $index 0 }} is-active{{ end }}">
+                    <blockquote>{{ $quote.text }}</blockquote>
+                    {{- with $quote.author -}}
+                        <figcaption>— {{ . }}</figcaption>
+                    {{- end -}}
+                </figure>
+            {{- end -}}
+        </div>
+        {{- end -}}
+    </div>
+
+    <a class="hero-scroll" href="#latest-posts" aria-label="向下滚动">
+        <span>向下滚动</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" />
+        </svg>
+    </a>
+
+    <script>
+    (function () {
+        var hero = document.getElementById('hero');
+        if (!hero) return;
+
+        var nav = document.getElementById('topnav');
+        if (nav) {
+            var onScroll = function () {
+                nav.classList.toggle('scrolled', window.scrollY > 24);
+            };
+            window.addEventListener('scroll', onScroll, { passive: true });
+            onScroll();
+        }
+
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) return;
+
+        var slides = hero.querySelectorAll('.hero-slide');
+        var quotes = hero.querySelectorAll('.hero-quote');
+        var interval = {{ default 6500 .interval }};
+
+        if (slides.length > 1) {
+            var si = 0;
+            window.setInterval(function () {
+                if (document.hidden) return;
+                slides[si].classList.remove('is-active');
+                si = (si + 1) % slides.length;
+                slides[si].classList.add('is-active');
+            }, interval);
+        }
+
+        if (quotes.length > 1) {
+            var qi = 0;
+            window.setInterval(function () {
+                if (document.hidden) return;
+                quotes[qi].classList.remove('is-active');
+                qi = (qi + 1) % quotes.length;
+                quotes[qi].classList.add('is-active');
+            }, interval + 2200);
+        }
+    }());
+    </script>
+</section>
+{{- end -}}
+{{- end -}}
+{{ end }}
+
+{{ define "main" }}
+{{- $pages := where .Site.RegularPages "Type" "in" .Site.Params.mainSections -}}
+{{- $notHidden := where .Site.RegularPages "Params.hidden" "!=" true -}}
+{{- $filtered := ($pages | intersect $notHidden) -}}
+{{- $pag := .Paginate ($filtered) -}}
+<section class="home-latest" id="latest-posts">
+    <header class="home-latest-header">
+        <h2 class="home-section-title">最近写下的</h2>
+        <p class="home-section-desc">慢慢更新，慢慢变好。</p>
+    </header>
+
+    <section class="article-list article-grid">
+        {{- range $pag.Pages -}}
+            {{ partial "article-list/default" . }}
+        {{- end -}}
+    </section>
+
+    {{- partial "pagination.html" . -}}
+
+    {{ partialCached "footer/footer" . }}
+</section>
+{{ end }}
+
+{{ define "right-sidebar" }}{{ end }}

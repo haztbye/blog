@@ -42,6 +42,13 @@ git push
 
 仓库：https://github.com/haztbye/blog
 
+## 首页外观
+
+- 顶部胶囊导航：`layouts/partials/sidebar/left.html`
+- 首页全屏 Hero：`layouts/index.html` + `config/_default/params.toml` 的 `[hero]`
+- 照片放在 `static/img/hero/`（建议 1600×900），语录在 `params.toml` 的 `[[hero.quotes]]`
+- 文章网格：`assets/scss/custom.scss` 里的 `.article-grid`
+
 ## 目录说明
 
 - `content/`：文章与页面（`post/` 文章，`page/` 归档/搜索/关于）
