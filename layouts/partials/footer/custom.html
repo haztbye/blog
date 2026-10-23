@@ -1,0 +1,30 @@
+{{- /* 自定义页脚内容：回到顶部按钮 */ -}}
+<button id="back-to-top" type="button" aria-label="回到顶部" title="回到顶部">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 19V5" />
+        <path d="M5 12l7-7 7 7" />
+    </svg>
+</button>
+<script>
+    (function () {
+        var btn = document.getElementById('back-to-top');
+        if (!btn) return;
+
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+        function update() {
+            btn.classList.toggle('show', window.scrollY > 420);
+        }
+
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+
+        btn.addEventListener('click', function () {
+            window.scrollTo({
+                top: 0,
+                behavior: reduceMotion.matches ? 'auto' : 'smooth'
+            });
+        });
+    }());
+</script>

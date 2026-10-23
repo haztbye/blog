@@ -1,11 +1,9 @@
 name: Update theme
 
-# Controls when the workflow will run
+# 主题升级改成手动触发（Actions 页面点 Run workflow）。
+# 原因：Stack 主题升级可能改动 DOM/类名，会让 assets/scss/custom.scss 的样式失效，
+# 每次升级后都应该本地预览确认，而不是每天自动提交。
 on:
-  schedule:
-    # Update theme automatically everyday at 00:00 UTC
-    - cron: "0 0 * * *"
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:

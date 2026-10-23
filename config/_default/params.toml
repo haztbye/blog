@@ -6,15 +6,15 @@ favicon = "/favicon.png"
 
 [footer]
 since = 2020
-customText = ""
+customText = "愿我们都在去看花海的路上 🌸"
 
 [dateFormat]
-published = "Jan 02, 2006"
-lastUpdated = "Jan 02, 2006 15:04 MST"
+published = "2006 年 01 月 02 日"
+lastUpdated = "2006 年 01 月 02 日 15:04"
 
 [sidebar]
-emoji = "🍥"
-subtitle = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+emoji = "🍮 "
+subtitle = "去看花海的路上"
 
 [sidebar.avatar]
 enabled = true
@@ -60,9 +60,9 @@ site = ""
 card = "summary_large_image"
 
 [defaultImage.opengraph]
-enabled = false
+enabled = true
 local = false
-src = ""
+src = "img/og-default.jpg"
 
 [colorScheme]
 toggle = true
@@ -75,8 +75,10 @@ enabled = true
 enabled = true
 
 ## Comments
+# Disqus 用的是主题作者的演示 shortname，且国内网络基本加载不出来，
+# 先关闭以免文章底部留一块空白；以后可以换成 giscus / waline 再打开。
 [comments]
-enabled = true
+enabled = false
 provider = "disqus"
 
 [comments.disqusjs]

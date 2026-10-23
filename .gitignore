@@ -1,3 +1,6 @@
 public
 resources
 .hugo_build.lock
+
+# 本地预览/截图临时产物
+/.preview/
