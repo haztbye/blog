@@ -64,9 +64,9 @@ function Test-Protected {
     return $false
 }
 
-# 把一批相对路径安全地交给远端执行
-# （避开 Windows 管道 BOM、换行符、中文编码等坑）
-# 路径列表 -> UTF-8 -> Base64 -> 远端 base64 -d 还原 -> xargs 逐行执行
+# 把一批相对路径交给远端执行
+# 做法：本地写成清单文件 -> scp 到服务器 /tmp -> 远端逐行读取执行
+# （不用 base64，避免被安全软件误判为可疑脚本）
 function Invoke-RemoteListAction {
     param(
         [string[]]$Items,
@@ -75,24 +75,32 @@ function Invoke-RemoteListAction {
     $clean = @($Items | Where-Object { $_ -and $_.Trim() })
     if ($clean.Count -eq 0) { return }
 
+    $remoteTmp = '/tmp/hugo-deploy-list.txt'
     $chunkSize = 40
     for ($i = 0; $i -lt $clean.Count; $i += $chunkSize) {
         $end   = [Math]::Min($i + $chunkSize - 1, $clean.Count - 1)
         $chunk = @($clean[$i..$end])
-        $b64   = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(($chunk -join "`n")))
-        $remoteCmd = "cd '" + $RemotePath + "' && printf %s '" + $b64 + "' | base64 -d | xargs -d '\n' " + $ShellAction
 
-        # 偶发的 SSH 失败自动重试，最多 3 次
-        $attempt = 0
-        while ($true) {
-            $attempt++
-            & ssh -o BatchMode=yes $SshHost $remoteCmd
-            if ($LASTEXITCODE -eq 0) { break }
-            if ($attempt -ge 3) {
-                throw ("远端操作失败（" + $ShellAction + "）；可加 -DryRun 先预览清单")
+        $listFile = Join-Path ([System.IO.Path]::GetTempPath()) ('hugo-deploy-list-' + [guid]::NewGuid().ToString('N') + '.txt')
+        [System.IO.File]::WriteAllText($listFile, ($chunk -join "`n"), (New-Object System.Text.UTF8Encoding($false)))
+
+        $done = $false
+        for ($attempt = 1; $attempt -le 5; $attempt++) {
+            & scp -o BatchMode=yes -q $listFile ($SshHost + ':' + $remoteTmp)
+            if ($LASTEXITCODE -eq 0) {
+                $cmd = "cd '" + $RemotePath + "' && tr -d '\r' < " + $remoteTmp + " | xargs -d '\n' " + $ShellAction
+                & ssh -o BatchMode=yes $SshHost $cmd
+                if ($LASTEXITCODE -eq 0) { $done = $true; break }
             }
-            Write-Host ("  [!] 第 " + $attempt + " 次尝试失败，2 秒后重试...") -ForegroundColor Yellow
-            Start-Sleep -Seconds 2
+            if ($attempt -lt 5) {
+                Write-Host ("  [!] 第 " + $attempt + " 次尝试失败，2 秒后重试...") -ForegroundColor Yellow
+                Start-Sleep -Seconds 2
+            }
+        }
+
+        Remove-Item -LiteralPath $listFile -Force -ErrorAction SilentlyContinue
+        if (-not $done) {
+            throw ("远端操作失败（" + $ShellAction + "）；可加 -DryRun 先预览清单")
         }
     }
 }
@@ -115,24 +123,40 @@ function Convert-Md5Output {
 }
 
 # 一次性取回远端所有文件的 MD5
-# 整包 Base64 传回，彻底规避「控制台编码 / 中文路径」问题
+# 做法：远端把 md5sum 结果写到 /tmp -> scp 拉回本地 -> 按 UTF-8 读取
+# （避免依赖控制台编码，也不用 base64）
 function Get-RemoteFileHashes {
     param(
         [string]$Path,
         [string]$SshTarget
     )
-    $raw = & ssh -o BatchMode=yes -o ConnectTimeout=20 $SshTarget ("cd '" + $Path + "' 2>/dev/null && find . -type f -print0 | xargs -0 md5sum 2>/dev/null | base64 | tr -d '\n'") 2>$null
-    $ok = ($LASTEXITCODE -eq 0)
-    $text = ''
-    $b64 = (@($raw) -join '').Trim()
-    if ($ok -and $b64) {
-        try {
-            $text = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($b64))
-        } catch {
-            $text = ''
-        }
+
+    # 先确认远端目录存在，不存在就当作首次部署
+    $probe = & ssh -o BatchMode=yes -o ConnectTimeout=20 $SshTarget ("test -d '" + $Path + "' && echo DIR_YES || echo DIR_NO") 2>$null
+    if (($probe -join "`n") -notmatch 'DIR_YES') {
+        return @{ Ok = $false; Map = @{} }
     }
-    $map = Convert-Md5Output ($text -split "`n")
+
+    $remoteFile = '/tmp/hugo-deploy-hashes.txt'
+    $localFile  = Join-Path ([System.IO.Path]::GetTempPath()) ('hugo-deploy-hashes-' + [guid]::NewGuid().ToString('N') + '.txt')
+    $ok = $false
+
+    for ($attempt = 1; $attempt -le 5; $attempt++) {
+        $cmd = "cd '" + $Path + "' && find . -type f -print0 | xargs -0 md5sum > " + $remoteFile + " 2>/dev/null"
+        & ssh -o BatchMode=yes $SshTarget $cmd
+        if ($LASTEXITCODE -eq 0) {
+            & scp -o BatchMode=yes -q ($SshTarget + ':' + $remoteFile) $localFile
+            if ($LASTEXITCODE -eq 0) { $ok = $true; break }
+        }
+        if ($attempt -lt 5) { Start-Sleep -Seconds 2 }
+    }
+
+    $map = @{}
+    if ($ok -and (Test-Path -LiteralPath $localFile)) {
+        $lines = [System.IO.File]::ReadAllLines($localFile, [System.Text.Encoding]::UTF8)
+        $map = Convert-Md5Output $lines
+        Remove-Item -LiteralPath $localFile -Force -ErrorAction SilentlyContinue
+    }
     return @{ Ok = $ok; Map = $map }
 }
 
