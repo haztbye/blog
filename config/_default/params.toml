@@ -196,6 +196,18 @@ src = "/img/hero/slide-9.jpg"
 [[hero.slides]]
 src = "/img/hero/slide-10.jpg"
 
+[[hero.slides]]
+src = "/img/hero/slide-11.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-12.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-13.jpg"
+
+[[hero.slides]]
+src = "/img/hero/slide-14.jpg"
+
 [[hero.quotes]]
 text = "凡心所向，素履以往；生如逆旅，一苇以航。"
 author = "七堇年《尘曲》"
