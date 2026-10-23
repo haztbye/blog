@@ -59,7 +59,12 @@ tags:
 - 需要的仓库 Secrets：`SERVER_HOST`、`SERVER_USER`、`SERVER_SSH_KEY`，可选 `SERVER_PORT`（默认 22）
 - 同步用 `rsync --delete`，但会保留服务器上的 `.user.ini` / `.htaccess` / `.well-known/`
 
-本地曾经用过的 `deploy-blog.ps1/.bat`（增量上传脚本）现在只是**应急备用**，正常流程用不到，也可以删掉。
+旧的本地部署脚本（`deploy-blog.ps1` / `deploy-blog.bat`）已移除。若将来 GitHub Actions 长期不可用，可从 git 历史里恢复：
+
+```bash
+git log --all --oneline -- deploy-blog.ps1   # 找到最后一个包含它的提交
+git show <commit>:deploy-blog.ps1 > deploy-blog.ps1
+```
 
 本地预览不受影响：
 
@@ -79,8 +84,7 @@ hugo server
 │   └── page/          # 归档、搜索、关于
 ├── layouts/           # 覆盖主题的局部模板
 ├── static/            # 原样输出的文件（favicon、分享图等）
-├── deploy-blog.ps1    # 增量部署脚本（deploy-blog.bat 是双击入口）
-├── publish.bat        # 一键发布：提交 + 推送 + 部署
+├── publish.bat        # 一键发布：提交 + 推送（推送后由 Actions 自动部署）
 └── guide.md           # 本地开发/部署速查
 ```
 

@@ -22,15 +22,11 @@ hugo server --disableFastRender
 - 需要的仓库 Secrets：`SERVER_HOST`、`SERVER_USER`、`SERVER_SSH_KEY`，可选 `SERVER_PORT`（默认 22）
 - 服务器上的 `.user.ini` / `.htaccess` / `.well-known/` 不会被删除
 
-旧的 `deploy-blog.ps1` / `deploy-blog.bat` 是本地增量上传脚本，现在仅作应急备用，正常流程用不到。
+旧的本地部署脚本（`deploy-blog.ps1` / `deploy-blog.bat`）已删除。若 GitHub Actions 长期不可用，可从 git 历史恢复：
 
-## 只部署（应急，不推荐日常用）
-
-若 GitHub Actions 不可用，可临时用：
-
-```bat
-deploy-blog.bat            :: 增量上传
-deploy-blog.bat -DryRun    :: 只预览差异
+```bash
+git log --all --oneline -- deploy-blog.ps1
+git show <commit>:deploy-blog.ps1 > deploy-blog.ps1
 ```
 
 ## 手动 git 流程
@@ -57,7 +53,7 @@ git push
 - `layouts/`：覆盖主题的局部模板（回到顶部、主题色、iOS 图标、字体加载）
 - `config/_default/`：站点配置（`config.toml`、`params.toml`、`menu.toml` 等）
 - `static/`：原样拷贝到站点根目录的文件（favicon、分享图）
-- `deploy-blog.ps1` / `deploy-blog.bat` / `publish.bat`：部署脚本（Hugo 主程序在该仓库的上一级目录）
+- `publish.bat`：一键发布（提交 + 推送，随后 GitHub Actions 自动部署）
 - `public/`、`resources/`：构建产物/缓存，已被 `.gitignore` 排除，不提交
 
 ## 服务器初始化
