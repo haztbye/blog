@@ -2152,3 +2152,148 @@ body.home .main-container::after {
         }
     }
 }
+
+/* ==========================================================================
+   16. 音乐页（APlayer）
+   ========================================================================== */
+
+body.template-music .main-container {
+    max-width: 920px;
+}
+
+.music-page {
+    width: 100%;
+    padding-bottom: 20px;
+}
+
+.music-header {
+    margin-bottom: 24px;
+}
+
+.music-title {
+    margin: 0;
+    font-family: var(--tw-font-display);
+    font-size: 3.2rem;
+    letter-spacing: 0.12em;
+    color: var(--card-text-color-main);
+}
+
+.music-desc {
+    margin: 10px 0 0;
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    color: var(--card-text-color-tertiary);
+}
+
+.music-player-wrap {
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: var(--tw-shadow-card);
+}
+
+.music-hint {
+    margin: 16px 0 0;
+    font-size: 1.24rem;
+    letter-spacing: 0.06em;
+    color: var(--card-text-color-tertiary);
+}
+
+/* APlayer 融入主题风格 */
+.aplayer {
+    background: var(--tw-glass-bg) !important;
+    -webkit-backdrop-filter: var(--tw-glass-blur);
+    backdrop-filter: var(--tw-glass-blur);
+    border: 1px solid var(--tw-glass-border);
+    border-radius: 22px !important;
+    box-shadow: none !important;
+    font-family: var(--tw-font-sans) !important;
+    color: var(--card-text-color-main) !important;
+}
+
+.aplayer.aplayer-withlist .aplayer-list {
+    border-top: 1px solid var(--card-separator-color) !important;
+}
+
+.aplayer .aplayer-info .aplayer-music {
+    color: var(--card-text-color-main) !important;
+}
+
+.aplayer .aplayer-info .aplayer-music .aplayer-title {
+    color: var(--card-text-color-main) !important;
+    font-family: var(--tw-font-display) !important;
+}
+
+.aplayer .aplayer-info .aplayer-music .aplayer-author {
+    color: var(--card-text-color-secondary) !important;
+}
+
+.aplayer .aplayer-info .aplayer-controller .aplayer-time {
+    color: var(--card-text-color-tertiary) !important;
+}
+
+.aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon path {
+    fill: var(--card-text-color-secondary) !important;
+}
+
+.aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar {
+    background: var(--card-separator-color) !important;
+}
+
+.aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-loaded {
+    background: var(--card-separator-color) !important;
+}
+
+.aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
+    background-image: linear-gradient(90deg, #7b68ee, #d97bc4) !important;
+}
+
+.aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-thumb {
+    background: #fff !important;
+}
+
+.aplayer .aplayer-list {
+    color: var(--card-text-color-main) !important;
+}
+
+.aplayer .aplayer-list ol li {
+    border-top: 1px solid var(--card-separator-color) !important;
+    color: var(--card-text-color-secondary) !important;
+}
+
+.aplayer .aplayer-list ol li .aplayer-list-index {
+    color: var(--card-text-color-tertiary) !important;
+}
+
+.aplayer .aplayer-list ol li:hover {
+    background: rgba(123, 104, 238, 0.08) !important;
+}
+
+.aplayer .aplayer-list ol li.aplayer-list-light {
+    background: rgba(123, 104, 238, 0.14) !important;
+}
+
+.aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-title {
+    color: var(--accent-color) !important;
+}
+
+.aplayer .aplayer-lrc {
+    display: none;
+}
+
+[data-scheme="dark"] .aplayer {
+    background: rgba(28, 24, 54, 0.72) !important;
+}
+
+[data-scheme="dark"] .aplayer .aplayer-list ol li:hover {
+    background: rgba(195, 179, 255, 0.08) !important;
+}
+
+@media (max-width: 760px) {
+    .music-title {
+        font-size: 2.4rem;
+    }
+
+    .music-desc {
+        font-size: 1.3rem;
+    }
+}

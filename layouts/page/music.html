@@ -1,0 +1,57 @@
+{{ define "body-class" }}template-music{{ end }}
+
+{{ define "main" }}
+<section class="music-page">
+    <header class="music-header">
+        <h1 class="music-title">{{ .Title }}</h1>
+        {{ with .Params.description }}<p class="music-desc">{{ . }}</p>{{ end }}
+    </header>
+
+    <div class="music-player-wrap">
+        <div id="aplayer"></div>
+    </div>
+
+    <p class="music-hint">歌单来自网易云音乐 · 点击播放</p>
+</section>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+<script>
+(function () {
+    var container = document.getElementById('aplayer');
+    var api = {{ (default "/meting/api.php" .Site.Params.music.api) | jsonify }};
+    var playlistId = {{ (default "" .Site.Params.music.playlist_id) | jsonify }};
+
+    if (!playlistId) {
+        container.innerHTML = '<p class="music-hint">歌单还没配置：在 params.toml 的 [music] 里填上 playlist_id</p>';
+        return;
+    }
+
+    fetch(api + '?type=playlist&id=' + encodeURIComponent(playlistId))
+        .then(function (resp) {
+            if (!resp.ok) { throw new Error('HTTP ' + resp.status); }
+            return resp.json();
+        })
+        .then(function (list) {
+            if (!Array.isArray(list) || list.length === 0) {
+                throw new Error('empty playlist');
+            }
+            window.musicPlayer = new APlayer({
+                container: container,
+                audio: list,
+                listFolded: false,
+                listMaxHeight: '430px',
+                lrcType: 0,
+                preload: 'none',
+                mutex: true,
+                theme: '#7b68ee'
+            });
+        })
+        .catch(function () {
+            container.innerHTML = '<p class="music-hint">歌单加载失败，稍后再试</p>';
+        });
+}());
+</script>
+
+{{ partialCached "footer/footer" . }}
+{{ end }}
