@@ -9,28 +9,29 @@ hugo server --disableFastRender
 
 浏览器打开 http://localhost:1313 ，改文件保存后自动刷新。
 
-## 一键发布（推荐）
+## 发布（GitHub Actions 自动部署）
 
-双击仓库目录里的 **publish.bat**：git 提交 → 推送 GitHub → 构建并部署上线。
+1. 改内容（本地可用 `hugo server` 预览）
+2. 双击 **`publish.bat`**：只做 `git add / commit / push`
+3. GitHub Actions 自动构建并同步到服务器（约 1~2 分钟）
+4. 刷新 https://huanhe.site 查看；进度看 https://github.com/haztbye/blog/actions
 
-也可以在命令行带提交说明运行：
+说明：
+
+- 只有 push 到 `master` 才触发部署；也可以在 Actions 页手动 `Run workflow`
+- 需要的仓库 Secrets：`SERVER_HOST`、`SERVER_USER`、`SERVER_SSH_KEY`，可选 `SERVER_PORT`（默认 22）
+- 服务器上的 `.user.ini` / `.htaccess` / `.well-known/` 不会被删除
+
+旧的 `deploy-blog.ps1` / `deploy-blog.bat` 是本地增量上传脚本，现在仅作应急备用，正常流程用不到。
+
+## 只部署（应急，不推荐日常用）
+
+若 GitHub Actions 不可用，可临时用：
 
 ```bat
-publish.bat "update: 新增一篇文章"
+deploy-blog.bat            :: 增量上传
+deploy-blog.bat -DryRun    :: 只预览差异
 ```
-
-## 只部署（不提交 git）
-
-双击 **deploy-blog.bat**，默认增量：只上传有变化的文件。
-
-可用参数：
-
-- `-DryRun` 只对比并显示"要上传 / 要删除"的清单，不动服务器
-- `-Full` 忽略差异全部重传（保险模式）
-- `-NoDelete` 只上传，不删除服务器上多余的文件
-
-原理：hugo 构建 → 本地文件算 MD5 → ssh 读取服务器文件 MD5 → 只传差异 → 修权限 → 内容校验。
-服务器根目录的 `.user.ini` / `.htaccess` / `.well-known` 等文件受保护，不会被删除。
 
 ## 手动 git 流程
 

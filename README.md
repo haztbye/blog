@@ -48,15 +48,25 @@ tags:
 
 ## 部署
 
-推荐双击 `publish.bat`：**提交 + 推送 GitHub + 构建部署** 一次完成。
+部署由 **GitHub Actions** 自动完成（`.github/workflows/deploy.yml`）：
 
-也可以分开：
+```
+改内容 → 双击 publish.bat（提交 + 推送）→ GitHub 自动构建并同步到服务器 → 刷新网站
+```
 
-- `deploy-blog.bat`：只做部署（增量上传；`-DryRun` 可预览差异、`-Full` 全量重传、`-NoDelete` 不删多余文件）
-- 手动 git：`git add -A && git commit -m "..." && git push`
+- 只有 push 到 `master` 才会触发；也可在仓库 Actions 页手动点 `Run workflow`
+- 推完约 1~2 分钟生效，进度看 <https://github.com/haztbye/blog/actions>
+- 需要的仓库 Secrets：`SERVER_HOST`、`SERVER_USER`、`SERVER_SSH_KEY`，可选 `SERVER_PORT`（默认 22）
+- 同步用 `rsync --delete`，但会保留服务器上的 `.user.ini` / `.htaccess` / `.well-known/`
 
-部署脚本原理：hugo 构建 → 本地文件算 MD5 → ssh 读取服务器文件 MD5 → 只传差异 → 修权限 → 内容校验。
-服务器根目录的 `.user.ini` / `.htaccess` / `.well-known` 等文件受保护，不会被删除。
+本地曾经用过的 `deploy-blog.ps1/.bat`（增量上传脚本）现在只是**应急备用**，正常流程用不到，也可以删掉。
+
+本地预览不受影响：
+
+```bash
+hugo server
+```
+
 
 ## 目录结构
 
