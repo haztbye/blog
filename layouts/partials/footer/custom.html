@@ -36,17 +36,40 @@
             el.textContent = info.emoji;
         });
 
-        /* 季节飘落花瓣：一点点，够味道就行 */
+        /* 季节飘落叶片：春樱瓣 / 夏绿叶 / 秋枫叶 / 冬雪花（每种随机取同系三种色） */
         (function () {
             var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             if (reduce || window.innerWidth < 760) return;
 
             var season = document.documentElement.getAttribute('data-season') || 'spring';
+
+            function pick(list) {
+                return list[Math.floor(Math.random() * list.length)];
+            }
+
             var shapes = {
-                spring: { path: 'M12 2c3.2 4.4 8 6.8 8 12a8 8 0 0 1-16 0c0-5.2 4.8-7.6 8-12z', fill: '#f7b8d3' },
-                summer: { path: 'M12 3c6.5 4 8.5 11.5 0 18-8.5-6.5-6.5-14 0-18z', fill: '#8ed7a9' },
-                autumn: { path: 'M12 2l2.2 5.6L20 6l-2.6 5.2L22 13l-5.4 1.2L18 20l-6-3.4L6 20l1.4-5.8L2 13l4.6-1.8L4 6l5.8 1.6z', fill: '#e08a3c' },
-                winter: { path: '', fill: '#cfe0ff', stroke: true }
+                spring: {
+                    min: 11, max: 20,
+                    svg: function () {
+                        var tint = pick(['#f9c6dc', '#f7b8d3', '#f2a5c6']);
+                        return '<svg viewBox="0 0 24 24"><path d="M12 22C7 17.5 4 13 4.6 8.6 5 5.6 7.4 3.4 9.6 4.8c1.2.7 1.6 1.8 2.4 1.8.8 0 1.2-1.1 2.4-1.8 2.2-1.4 4.6.8 5 3.8C20 13 17 17.5 12 22Z" fill="' + tint + '" stroke="#e78fb4" stroke-width="0.7"/></svg>';
+                    }
+                },
+                summer: {
+                    min: 12, max: 21,
+                    svg: function () {
+                        var tint = pick(['#7ec98f', '#6fbf87', '#8fd39e']);
+                        return '<svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" fill="' + tint + '"/><path d="M4 21c0-3 1.85-5.36 5.08-6C11.5 14.5 12 13 13 12" fill="none" stroke="#3f8f57" stroke-width="1" stroke-linecap="round"/></svg>';
+                    }
+                },
+                autumn: {
+                    min: 15, max: 26,
+                    emoji: '🍂'
+                },
+                winter: {
+                    min: 13, max: 24,
+                    emoji: '❄️'
+                }
             };
             var conf = shapes[season] || shapes.spring;
 
@@ -57,7 +80,7 @@
             for (var i = 0; i < 12; i++) {
                 var item = document.createElement('span');
                 item.className = 'petal-fall-item';
-                var size = 11 + Math.random() * 11;
+                var size = conf.min + Math.random() * (conf.max - conf.min);
                 item.style.left = (Math.random() * 100).toFixed(2) + '%';
                 item.style.width = size.toFixed(1) + 'px';
                 item.style.height = size.toFixed(1) + 'px';
@@ -66,10 +89,14 @@
                 item.style.animationDelay = (-Math.random() * 20).toFixed(1) + 's';
                 item.style.setProperty('--drift', (Math.random() * 140 - 70).toFixed(0) + 'px');
                 item.style.setProperty('--spin', (Math.random() * 720 - 360).toFixed(0) + 'deg');
-                item.innerHTML = conf.stroke
-                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="' + conf.fill + '" stroke-width="1.6" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7"/></svg>'
-                    : '<svg viewBox="0 0 24 24"><path d="' + conf.path + '" fill="' + conf.fill + '"' +
-                    (season === 'autumn' ? ' stroke="#b5651d" stroke-width="0.9" stroke-linejoin="round"' : '') + '/></svg>';
+                if (conf.emoji) {
+                    item.textContent = conf.emoji;
+                    item.style.fontSize = size.toFixed(1) + 'px';
+                    item.style.lineHeight = size.toFixed(1) + 'px';
+                    item.style.textAlign = 'center';
+                } else {
+                    item.innerHTML = conf.svg();
+                }
                 layer.appendChild(item);
             }
 

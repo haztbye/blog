@@ -1,0 +1,62 @@
+/*! giscus 自定义主题 · 薄暮花海（亮色）
+ * 基于官方 light 主题的 Primer 变量覆盖（MIT © 2018 GitHub Inc.），
+ * 背景设为透明，融入站点的玻璃卡片。 */
+
+main {
+    --color-fg-default: #2b2740;
+    --color-fg-muted: #605b7d;
+    --color-fg-subtle: #8a85a6;
+
+    --color-canvas-default: transparent;
+    --color-canvas-overlay: #ffffff;
+    --color-canvas-inset: #f7f5fd;
+    --color-canvas-subtle: #f7f5fd;
+
+    --color-border-default: rgba(120, 108, 175, 0.24);
+    --color-border-muted: rgba(120, 108, 175, 0.14);
+
+    --color-neutral-muted: rgba(123, 104, 238, 0.12);
+
+    --color-accent-fg: #6b56d8;
+    --color-accent-emphasis: #6b56d8;
+    --color-accent-muted: rgba(123, 104, 238, 0.35);
+    --color-accent-subtle: rgba(123, 104, 238, 0.12);
+
+    --color-btn-text: #2b2740;
+    --color-btn-bg: #f7f5fd;
+    --color-btn-border: rgba(120, 108, 175, 0.25);
+    --color-btn-shadow: 0 1px 0 rgba(72, 54, 140, 0.04);
+    --color-btn-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    --color-btn-hover-bg: #efebfb;
+    --color-btn-hover-border: rgba(120, 108, 175, 0.3);
+    --color-btn-active-bg: #eae4f9;
+    --color-btn-active-border: rgba(120, 108, 175, 0.3);
+    --color-btn-selected-bg: #eae4f9;
+
+    --color-btn-primary-text: #ffffff;
+    --color-btn-primary-bg: #6b56d8;
+    --color-btn-primary-border: #5b45d6;
+    --color-btn-primary-hover-bg: #5b45d6;
+    --color-btn-primary-hover-border: #4c39c4;
+    --color-btn-primary-selected-bg: #4c39c4;
+
+    --color-action-list-item-default-hover-bg: rgba(123, 104, 238, 0.08);
+    --color-segmented-control-bg: #efebfb;
+    --color-segmented-control-button-bg: #ffffff;
+    --color-segmented-control-button-selected-border: rgba(120, 108, 175, 0.5);
+
+    --color-scale-gray-1: #efebfb;
+    --color-scale-blue-1: #ddd6fa;
+
+    --color-social-reaction-bg-hover: var(--color-scale-gray-1);
+    --color-social-reaction-bg-reacted-hover: var(--color-scale-blue-1);
+}
+
+main,
+main .giscus,
+main .giscus input,
+main .giscus textarea,
+main .giscus button {
+    font-family: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont,
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", "Noto Sans SC", sans-serif;
+}

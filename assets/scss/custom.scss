@@ -2480,20 +2480,68 @@ html[data-season] .tagCloud .tagCloud-tags a:hover {
     margin-top: 14px;
 }
 
-/* 花瓣形状：未解锁 = 灰沙色，已解锁 = 当季色调 */
+/* 四季叶片：形状与颜色随 data-season 切换（春樱瓣 / 夏绿叶 / 秋枫叶 / 冬雪花） */
+html {
+    --fleaf: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%2022C7%2017.5%204%2013%204.6%208.6%205%205.6%207.4%203.4%209.6%204.8c1.2.7%201.6%201.8%202.4%201.8.8%200%201.2-1.1%202.4-1.8%202.2-1.4%204.6.8%205%203.8C20%2013%2017%2017.5%2012%2022Z'/%3E%3C/svg%3E");
+    --fleaf-color: #f2a0c4;
+}
+
+html[data-season="spring"] {
+    --fleaf: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%2022C7%2017.5%204%2013%204.6%208.6%205%205.6%207.4%203.4%209.6%204.8c1.2.7%201.6%201.8%202.4%201.8.8%200%201.2-1.1%202.4-1.8%202.2-1.4%204.6.8%205%203.8C20%2013%2017%2017.5%2012%2022Z'/%3E%3C/svg%3E");
+    --fleaf-color: #f2a0c4;
+}
+
+html[data-season="summer"] {
+    --fleaf: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M11%2020A7%207%200%200%201%209.8%206.1C15.5%205%2017%204.48%2019%202c1%202%202%204.18%202%208%200%205.5-4.78%2010-10%2010Z'/%3E%3C/svg%3E");
+    --fleaf-color: #4faf6e;
+}
+
+/* 叶片形状：未解锁 = 淡灰剪影，已解锁 = 当季颜色 */
 .flower-progress-flower {
-    width: 11px;
-    height: 11px;
-    border-radius: 50% 50% 50% 0;
+    width: 18px;
+    height: 18px;
     background-color: var(--card-separator-color);
-    transform: rotate(-45deg);
-    transition: background-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+    opacity: 0.75;
+    -webkit-mask: var(--fleaf) center / contain no-repeat;
+    mask: var(--fleaf) center / contain no-repeat;
+    transition: background-color 0.4s ease, opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease;
 }
 
 .flower-progress-flower.is-bloomed {
-    background-color: var(--season-accent);
-    box-shadow: 0 0 8px var(--season-accent-soft);
-    transform: rotate(-45deg) scale(1.15);
+    background-color: var(--fleaf-color);
+    opacity: 1;
+    transform: scale(1.14);
+}
+
+/* 秋·冬：直接用 emoji（🍂 落叶 / ❄️ 雪花）；未点亮 = 置灰半透明，已点亮 = 原色 */
+html[data-season="autumn"] .flower-progress-flower,
+html[data-season="winter"] .flower-progress-flower {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    -webkit-mask: none;
+    mask: none;
+    font-size: 19px;
+    line-height: 1;
+    opacity: 0.45;
+    filter: grayscale(1);
+}
+
+html[data-season="autumn"] .flower-progress-flower::before {
+    content: "🍂";
+}
+
+html[data-season="winter"] .flower-progress-flower::before {
+    content: "❄️";
+}
+
+html[data-season="autumn"] .flower-progress-flower.is-bloomed,
+html[data-season="winter"] .flower-progress-flower.is-bloomed {
+    background-color: transparent;
+    opacity: 1;
+    filter: none;
+    transform: scale(1.08);
 }
 
 .flower-progress-note {
@@ -2517,7 +2565,17 @@ html[data-season] .tagCloud .tagCloud-tags a:hover {
     }
 
     .flower-progress-flowers {
-        font-size: 1.2rem;
+        gap: 6px;
+    }
+
+    .flower-progress-flower {
+        width: 15px;
+        height: 15px;
+    }
+
+    html[data-season="autumn"] .flower-progress-flower,
+    html[data-season="winter"] .flower-progress-flower {
+        font-size: 16px;
     }
 }
 
@@ -2529,205 +2587,47 @@ html[data-season] .tagCloud .tagCloud-tags a:hover {
 }
 
 /* ==========================================================================
-   18. 花海专题页（/flower/）
+   18. 评论区（giscus 玻璃卡片外框）
    ========================================================================== */
 
-body.template-flower .main-container {
-    max-width: 1080px;
-}
-
-.flower-page {
-    width: 100%;
-}
-
-.flower-hero {
-    margin-bottom: 22px;
-}
-
-.flower-title {
-    margin: 0;
-    font-family: var(--tw-font-display);
-    font-size: 3rem;
-    letter-spacing: 0.16em;
-    color: var(--card-text-color-main);
-}
-
-.flower-desc {
-    margin: 10px 0 0;
-    font-size: 1.4rem;
-    letter-spacing: 0.08em;
-    color: var(--card-text-color-secondary);
-}
-
-.flower-count {
-    margin: 8px 0 0;
-    font-size: 1.3rem;
-    letter-spacing: 0.06em;
-    color: var(--season-accent);
-}
-
-.flower-count strong {
-    font-size: 1.6rem;
-}
-
-/* 沙漠插画 */
-.flower-map {
-    position: relative;
-    aspect-ratio: 1200 / 680;
-    border-radius: 24px;
-    overflow: hidden;
-    background-color: #241d4a;
+.giscus-wrap {
+    margin-top: 44px;
+    padding: 18px 20px;
+    border-radius: 18px;
+    background-color: var(--tw-glass-bg);
+    -webkit-backdrop-filter: var(--tw-glass-blur);
+    backdrop-filter: var(--tw-glass-blur);
+    border: 1px solid var(--tw-glass-border);
     box-shadow: var(--tw-shadow-card);
 }
 
-.flower-map-svg {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-.flower-map-places {
-    position: absolute;
-    inset: 0;
-}
-
-.flower-place {
-    position: absolute;
+.giscus-wrap-head {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    transform: translate(-50%, -50%);
+    gap: 14px;
+    margin-bottom: 8px;
 }
 
-.flower-place-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    color: inherit;
-}
-
-.flower-place-bloom {
-    display: block;
-    width: 42px;
-    height: 42px;
-    filter: drop-shadow(0 6px 14px rgba(30, 16, 8, 0.45));
-    transition: transform 0.35s ease, filter 0.35s ease;
-}
-
-.flower-place-bloom svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-.flower-petals {
-    fill: var(--season-accent);
-}
-
-.flower-core {
-    fill: #fff4dd;
-}
-
-.flower-place-label {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background-color: rgba(24, 14, 34, 0.5);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    white-space: nowrap;
-}
-
-.flower-place-name {
-    font-size: 1.2rem;
-    letter-spacing: 0.08em;
-    color: #fff;
-}
-
-.flower-place-note {
-    font-size: 1rem;
-    color: rgba(255, 255, 255, 0.68);
-}
-
-.flower-place:hover .flower-place-bloom,
-.flower-place:focus-within .flower-place-bloom {
-    filter: drop-shadow(0 8px 20px rgba(255, 210, 140, 0.6));
-    transform: scale(1.18) rotate(6deg);
-}
-
-.flower-place-link:hover .flower-place-label {
-    background-color: rgba(40, 20, 50, 0.72);
-}
-
-/* 地点清单（手机 / 快速跳转用） */
-.flower-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 22px 0 0;
-    padding: 0;
-    list-style: none;
-}
-
-.flower-list li {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    border-radius: 999px;
-    font-size: 1.24rem;
+.giscus-wrap-title {
+    font-family: var(--tw-font-display);
+    font-size: 1.4rem;
+    letter-spacing: 0.22em;
     color: var(--card-text-color-secondary);
-    background-color: var(--tw-glass-bg);
-    border: 1px solid var(--tw-glass-border);
 }
 
-.flower-list a {
-    color: var(--card-text-color-main);
-}
-
-.flower-list a:hover {
-    color: var(--season-accent);
-}
-
-.flower-list-note {
-    font-size: 1.1rem;
-    color: var(--card-text-color-tertiary);
-}
-
-.flower-list-arrow {
-    color: var(--season-accent);
+.giscus-wrap-line {
+    flex: 1;
+    height: 1px;
+    background-image: linear-gradient(90deg,
+            transparent,
+            var(--card-separator-color),
+            transparent);
 }
 
 @media (max-width: 760px) {
-    .flower-title {
-        font-size: 2.3rem;
-    }
-
-    .flower-map {
-        aspect-ratio: 1200 / 760;
-    }
-
-    .flower-place-bloom {
-        width: 30px;
-        height: 30px;
-    }
-
-    .flower-place-label {
-        padding: 3px 8px;
-    }
-
-    .flower-place-name {
-        font-size: 1.05rem;
-    }
-
-    .flower-place-note {
-        display: none;
+    .giscus-wrap {
+        margin-top: 32px;
+        padding: 14px 12px;
+        border-radius: 14px;
     }
 }

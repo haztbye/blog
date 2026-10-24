@@ -136,8 +136,9 @@ category = "Announcements"
 categoryID = "DIC_kwDOVUbRYM4DJfwB"
 mapping = "pathname"
 strict = 0
-lightTheme = "light"
-darkTheme = "dark_dimmed"
+# 主题指向站点自带的自定义主题（static/giscus/），随仓库一起部署
+lightTheme = "https://huanhe.site/giscus/light.css"
+darkTheme = "https://huanhe.site/giscus/dark.css"
 reactionsEnabled = 1
 emitMetadata = 0
 inputPosition = "bottom"
