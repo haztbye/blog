@@ -18,12 +18,12 @@
         <div class="hero-tint"></div>
     </div>
 
-    <div class="hero-content">
-        <p class="hero-kicker">{{ default "WELCOME" .kicker }}</p>
-        <h1 class="hero-title">{{ default "huanhe" .title }}</h1>
-        <p class="hero-subtitle">{{ default $.Site.Params.sidebar.subtitle .subtitle }}</p>
+    <div class="hero-welcome">
+        <p class="hero-welcome-title">Welcome</p>
+        <p class="hero-welcome-sub">{{ default "去看花海的路上" .subtitle }}</p>
+    </div>
 
-        {{- with .quotes -}}
+    {{- with .quotes -}}
         <div class="hero-quotes">
             {{- range $index, $quote := . -}}
                 <figure class="hero-quote{{ if eq $index 0 }} is-active{{ end }}">
@@ -35,6 +35,12 @@
             {{- end -}}
         </div>
         {{- end -}}
+
+    <div class="hero-signature">
+        <h1 class="hero-title">{{ default "huanhe" .title }}</h1>
+        <div class="hero-name" aria-hidden="true">
+            <span class="hero-name-char">唤</span><span class="hero-name-char">鹤</span>
+        </div>
     </div>
 
     <a class="hero-scroll" href="#latest-posts" aria-label="向下滚动">
@@ -242,7 +248,7 @@
 
 {{- $pag := .Paginate ($filtered) -}}
 <section class="home-latest" id="latest-posts">
-    <section class="flower-progress" id="flower-progress" aria-label="花海进度">
+            <section class="flower-progress" id="flower-progress" aria-label="花海进度">
         <div class="flower-progress-head">
             <h2 class="flower-progress-title">花海</h2>
             <span class="flower-progress-count">{{ $litPlaces }} / ∞ 个地方</span>
@@ -273,9 +279,9 @@
         {{- end -}}
     </section>
 
-    {{- partial "pagination.html" . -}}
+            {{- partial "pagination.html" . -}}
 
-    {{ partialCached "footer/footer" . }}
+            {{ partialCached "footer/footer" . }}
 </section>
 {{ end }}
 

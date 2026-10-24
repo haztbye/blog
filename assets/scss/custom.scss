@@ -1566,12 +1566,24 @@ footer.site-footer .powerby a:hover {
 }
 
 .topnav #dark-mode-toggle svg {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
 }
 
 .topnav #dark-mode-toggle span {
-    display: none;
+    display: inline;
+    font-size: 0;
+}
+
+/* 按钮文案随模式切换：当前浅色时提示可进入深色，反之亦然 */
+.topnav #dark-mode-toggle span::after {
+    content: "深色模式";
+    font-size: 1.26rem;
+    letter-spacing: 0.06em;
+}
+
+html[data-scheme="dark"] .topnav #dark-mode-toggle span::after {
+    content: "浅色模式";
 }
 
 /* 内容区为固定导航让位 */
@@ -1736,69 +1748,148 @@ body.home .main-container::after {
     text-align: center;
 }
 
-.hero-kicker {
-    margin: 0 0 16px;
-    font-size: 1.12rem;
-    letter-spacing: 0.52em;
-    text-indent: 0.52em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.72);
+/* 左上角 Welcome 区：贴角大字 + 波浪线副标题 */
+.hero-welcome {
+    position: absolute;
+    top: 112px;
+    left: 5vw;
+    z-index: 1;
+    text-align: left;
+}
+
+.hero-welcome-title {
+    margin: 0;
+    font-family: var(--tw-font-sans);
+    font-size: 15vh;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: #fff;
+}
+
+/* 深色模式下，Hero 文案反转为黑色（浅色模式保持白色） */
+[data-scheme="dark"] .hero-welcome-title {
+    color: #101010;
+}
+
+[data-scheme="dark"] .hero-welcome-sub {
+    color: rgba(16, 16, 16, 0.88);
+}
+
+[data-scheme="dark"] .hero-quote blockquote {
+    color: #101010;
+    text-shadow: none;
+}
+
+[data-scheme="dark"] .hero-quote figcaption {
+    color: rgba(16, 16, 16, 0.66);
+    text-shadow: none;
+}
+
+.hero-welcome-sub {
+    margin: 18px 0 0;
+    font-family: var(--tw-font-display);
+    font-size: 1.62rem;
+    letter-spacing: 0.32em;
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: rgba(255, 214, 130, 0.75);
+    text-decoration-thickness: 2.5px;
+    text-underline-offset: 12px;
+}
+
+/* 右下角签名区：手写体 huanhe 在上，「唤鹤」端正大字在下 */
+.hero-signature {
+    position: absolute;
+    right: 5vw;
+    bottom: 6vh;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 .hero-title {
-    margin: 0;
-    font-family: var(--tw-font-display);
-    font-size: 10.5rem;
-    line-height: 0.95;
-    letter-spacing: 0.04em;
-    background-image: linear-gradient(180deg, #ffffff 0%, #ffe4f5 52%, #c9b8ff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 14px 44px rgba(30, 18, 70, 0.7)) drop-shadow(0 2px 10px rgba(20, 12, 45, 0.55));
+    margin: 0 0 0.6vw;
+    font-family: "Segoe Script", "Snell Roundhand", "Brush Script MT", "Comic Sans MS", cursive;
+    font-size: 10vw;
+    line-height: 1.12;
+    letter-spacing: 0.01em;
+    color: #ffe9b8;
+    transform: rotate(-2.5deg);
+    text-shadow: 0 0 16px rgba(255, 216, 130, 0.55),
+        0 0 54px rgba(255, 190, 95, 0.38),
+        0 10px 34px rgba(24, 14, 50, 0.6);
 }
 
-.hero-subtitle {
-    margin: 20px 0 0;
-    font-family: var(--tw-font-display);
-    font-size: 1.58rem;
-    letter-spacing: 0.34em;
-    text-indent: 0.34em;
-    color: rgba(255, 255, 255, 0.92);
-    text-shadow: 0 2px 8px rgba(12, 8, 28, 0.65), 0 6px 22px rgba(12, 8, 28, 0.5);
+/* 「唤鹤」：两字齐平端正，季节色，每字约 1/6 视口宽 */
+.hero-name {
+    display: flex;
+    align-items: baseline;
+    line-height: 1;
 }
 
+.hero-name-char {
+    font-family: var(--tw-font-display);
+    font-size: 15.5vw;
+    line-height: 0.96;
+    font-weight: 700;
+    color: var(--season-accent);
+}
+
+.hero-name-char + .hero-name-char {
+    margin-left: 0.04em;
+}
+
+@media (min-width: 1500px) {
+    .hero-name-char {
+        font-size: 14.5rem;
+    }
+
+    .hero-title {
+        font-size: 9.6rem;
+    }
+}
+
+/* 格言：竖排，挂在主页左侧（像一条书签），整体偏上留足长句空间 */
 .hero-quotes {
-    position: relative;
-    width: 100%;
-    max-width: 760px;
-    margin: 44px auto 0;
-    height: 6.6em;
+    position: absolute;
+    left: 5vw;
+    top: 42%;
+    transform: translateY(-50%);
+    z-index: 1;
+    height: 72vh;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
 }
 
 .hero-quote {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: max-content;
     margin: 0;
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateX(10px);
     transition: opacity 0.9s ease, transform 0.9s ease;
 }
 
 .hero-quote.is-active {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
 }
 
 .hero-quote blockquote {
     margin: 0;
-    min-height: 1.7em;
     font-family: var(--tw-font-display);
-    font-size: 1.8rem;
-    line-height: 1.7;
-    letter-spacing: 0.05em;
+    font-size: 1.72rem;
+    line-height: 2.1;
+    letter-spacing: 0.22em;
     color: #fff;
-    text-wrap: balance;
+    /* 一列最多约 18 个字（1.72rem × 1.22 ≈ 2.1rem/字 × 18）就换下一列 */
+    max-height: 37.8rem;
     text-shadow: 0 2px 6px rgba(12, 8, 28, 0.7), 0 6px 26px rgba(12, 8, 28, 0.55);
 }
 
@@ -1822,9 +1913,9 @@ body.home .main-container::after {
 }
 
 .hero-quote figcaption {
-    margin-top: 10px;
+    margin: 0;
     font-size: 1.18rem;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.18em;
     color: rgba(255, 255, 255, 0.72);
     text-shadow: 0 2px 10px rgba(12, 8, 28, 0.6);
     transition: opacity 0.35s ease;
@@ -1877,7 +1968,9 @@ body.home .main-container::after {
 
 /* 滚动时 Hero 文案淡出（支持滚动时间轴的浏览器） */
 @supports (animation-timeline: scroll()) {
-    .hero-content,
+    .hero-welcome,
+    .hero-quotes,
+    .hero-signature,
     .hero-scroll {
         animation: hero-exit linear both;
         animation-timeline: scroll(root block);
@@ -2513,7 +2606,7 @@ html[data-season="summer"] {
     transform: scale(1.14);
 }
 
-/* 秋·冬：直接用 emoji（🍂 落叶 / ❄️ 雪花）；未点亮 = 置灰半透明，已点亮 = 原色 */
+/* 秋=🍁 枫叶、冬=⛄️ 雪人：直接用 emoji；春=樱瓣、夏=绿叶保持 SVG 剪影 */
 html[data-season="autumn"] .flower-progress-flower,
 html[data-season="winter"] .flower-progress-flower {
     display: inline-flex;
@@ -2529,11 +2622,11 @@ html[data-season="winter"] .flower-progress-flower {
 }
 
 html[data-season="autumn"] .flower-progress-flower::before {
-    content: "🍂";
+    content: "🍁";
 }
 
 html[data-season="winter"] .flower-progress-flower::before {
-    content: "❄️";
+    content: "⛄️";
 }
 
 html[data-season="autumn"] .flower-progress-flower.is-bloomed,
@@ -2631,3 +2724,488 @@ html[data-season="winter"] .flower-progress-flower.is-bloomed {
         border-radius: 14px;
     }
 }
+
+/* ==========================================================================
+   19. 手绘框格（Hand-drawn sketch frames）· 不透明纸张质感
+   覆盖：顶部导航框、书本标签、首页文章卡片、花海进度卡
+   （用户不喜欢圆滑毛玻璃，改为歪歪扭扭的手绘边框 + 硬投影）
+   ========================================================================== */
+
+:root {
+    --sketch-paper: #fffdf6;
+    --sketch-paper-strong: #fff8ea;
+    --sketch-ink: #453f58;
+    --sketch-line: 2.5px solid var(--sketch-ink);
+    --sketch-radius: 255px 18px 225px 22px / 22px 225px 18px 255px;
+    --sketch-radius-alt: 22px 225px 18px 255px / 255px 18px 225px 22px;
+    --sketch-shadow: 3px 4px 0 rgba(69, 63, 88, 0.14);
+    --sketch-shadow-hover: 5px 7px 0 rgba(69, 63, 88, 0.2);
+}
+
+[data-scheme="dark"] {
+    --sketch-paper: #241f42;
+    --sketch-paper-strong: #2a2450;
+    --sketch-ink: #d9d0f5;
+    --sketch-shadow: 3px 4px 0 rgba(0, 0, 0, 0.38);
+    --sketch-shadow-hover: 5px 7px 0 rgba(0, 0, 0, 0.48);
+}
+
+/* ---- 顶部导航：手绘框 ---- */
+.topnav-inner {
+    border-radius: var(--sketch-radius);
+    background-color: var(--sketch-paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border: var(--sketch-line);
+    box-shadow: var(--sketch-shadow);
+}
+
+.topnav.scrolled .topnav-inner {
+    background-color: var(--sketch-paper-strong);
+    box-shadow: var(--sketch-shadow-hover);
+}
+
+.topnav-avatar {
+    border: 1.5px solid var(--sketch-ink);
+}
+
+/* ---- 书本标签：贴在导航框下方，像便签 / 目录标签；每个一张专属手绘色 ---- */
+.topnav-tabs {
+    pointer-events: auto;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.sketch-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 17px 10px;
+    font-family: var(--tw-font-sans);
+    font-size: 1.34rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: var(--tab-ink, var(--sketch-ink));
+    text-decoration: none;
+    background-color: var(--sketch-paper-strong);
+    border: 2.2px solid var(--tab-ink, var(--sketch-ink));
+    border-radius: 4px 16px 10px 18px / 14px 8px 18px 10px;
+    box-shadow: var(--sketch-shadow);
+    transform: rotate(-1.6deg);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, color 0.25s ease, border-color 0.25s ease,
+        background-color 0.25s ease;
+}
+
+/* 专属手绘色：GitHub 紫 / B站粉 / 邮箱橘 / 微信绿 */
+.sketch-tab--github {
+    --tab-ink: #6b56d8;
+}
+
+.sketch-tab--bilibili {
+    --tab-ink: #f25d8e;
+}
+
+.sketch-tab--mail {
+    --tab-ink: #e8963d;
+}
+
+.sketch-tab--wechat {
+    --tab-ink: #3faf6e;
+}
+
+.topnav-tabs .sketch-tab:nth-child(2) {
+    transform: rotate(1.3deg);
+}
+
+.topnav-tabs .sketch-tab:nth-child(3) {
+    transform: rotate(-1.1deg);
+}
+
+.topnav-tabs .sketch-tab:nth-child(4) {
+    transform: rotate(1.6deg);
+}
+
+.sketch-tab svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 1.8;
+}
+
+.sketch-tab:hover {
+    transform: rotate(0deg) translateY(-2px) scale(1.04);
+    background-color: color-mix(in srgb, var(--tab-ink, var(--sketch-ink)) 12%, var(--sketch-paper-strong));
+    box-shadow: var(--sketch-shadow-hover);
+}
+
+/* 点击复制类标签（邮箱 / 微信）：按下后文字换成「已复制」 */
+.sketch-tab--mail,
+.sketch-tab--wechat {
+    cursor: pointer;
+    font: inherit;
+    font-family: var(--tw-font-sans);
+    font-size: 1.34rem;
+    font-weight: 600;
+}
+
+.sketch-tab .sketch-tab-copied {
+    display: none;
+    font-style: normal;
+}
+
+.sketch-tab.is-copied .sketch-tab-label {
+    display: none;
+}
+
+.sketch-tab.is-copied .sketch-tab-copied {
+    display: inline;
+}
+
+/* ---- 导航里的音乐按钮：展开迷你播放条，音符从框里跳出来 ---- */
+.topnav-music {
+    position: relative;
+    margin-left: 2px;
+}
+
+.topnav #nav-music-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1.5px solid var(--sketch-ink);
+    background-color: transparent;
+    color: var(--card-text-color-secondary);
+    font-family: inherit;
+    font-size: 1.26rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.topnav #nav-music-btn:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    box-shadow: var(--tw-shadow-glow);
+}
+
+.topnav #nav-music-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+.nav-music-panel {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: -6px;
+    width: 286px;
+    padding: 8px;
+    background-color: var(--sketch-paper);
+    border: var(--sketch-line);
+    border-radius: var(--sketch-radius);
+    box-shadow: var(--sketch-shadow-hover);
+    z-index: 5;
+}
+
+.nav-music-panel iframe {
+    display: block;
+    width: 100%;
+    height: 66px;
+    border: 0;
+    border-radius: 8px;
+}
+
+/* 切歌：上一首 / 当前歌名 / 下一首 */
+.music-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.music-switch button {
+    padding: 3px 10px;
+    font-family: inherit;
+    font-size: 1.15rem;
+    line-height: 1.4;
+    color: var(--sketch-ink);
+    background-color: var(--sketch-paper-strong);
+    border: 1.8px solid var(--sketch-ink);
+    border-radius: 10px 4px 12px 5px / 5px 12px 4px 10px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.music-switch button:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+}
+
+.music-status {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 1.24rem;
+    letter-spacing: 0.04em;
+    color: var(--card-text-color-secondary);
+    text-align: center;
+}
+
+/* 小音符从按钮里跳出来 */
+.music-note {
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--season-accent);
+    pointer-events: none;
+    animation: music-note-pop 1.7s ease-out forwards;
+}
+
+@keyframes music-note-pop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 2px) rotate(0deg) scale(0.5);
+    }
+
+    18% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--nx, 0px)), -58px) rotate(var(--nr, 18deg)) scale(1.2);
+    }
+}
+
+/* 标签占位扩大后，内页内容下移避让 */
+body:not(.home) .main-container {
+    padding-top: 150px;
+}
+
+/* ---- 首页文章卡片：手绘框 + 交错歪角 ---- */
+.article-list article {
+    background-color: var(--sketch-paper);
+    border: var(--sketch-line);
+    border-radius: var(--sketch-radius);
+    box-shadow: var(--sketch-shadow);
+}
+
+.article-list article:nth-child(even) {
+    border-radius: var(--sketch-radius-alt);
+}
+
+.article-list article:hover {
+    transform: translateY(-6px) rotate(-0.35deg);
+    box-shadow: var(--sketch-shadow-hover);
+    border-color: var(--sketch-ink);
+}
+
+/* ---- 花海进度卡：同样换手绘框 ---- */
+.flower-progress {
+    background-color: var(--sketch-paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border: var(--sketch-line);
+    border-radius: var(--sketch-radius-alt);
+    box-shadow: var(--sketch-shadow);
+}
+
+/* ---- 拉链 + 挂件：挂在导航框下方，左右拖动拉开拉链 ---- */
+.zipper {
+    --zip: 50%;
+    position: absolute;
+    top: calc(100% + 3px);
+    left: 14px;
+    right: 14px;
+    height: 9px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.zipper i {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: block;
+}
+
+/* 已拉开的部分：两道岔开的虚线 */
+.zipper .zip-open {
+    left: 0;
+    width: var(--zip);
+    border-top: 2px dashed var(--sketch-ink);
+    border-bottom: 2px dashed var(--sketch-ink);
+    opacity: 0.5;
+}
+
+/* 未拉开的部分：咬合的链齿 */
+.zipper .zip-closed {
+    left: var(--zip);
+    right: 0;
+    top: 1px;
+    bottom: 1px;
+    background-image: repeating-linear-gradient(90deg,
+            var(--sketch-ink) 0 3px,
+            transparent 3px 7px);
+    opacity: 0.55;
+}
+
+.zipper-pendant {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    width: 64px;
+    z-index: 3;
+    pointer-events: auto;
+    cursor: ew-resize;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    transform-origin: 50% 0;
+    will-change: transform;
+    filter: drop-shadow(0 8px 16px rgba(20, 12, 45, 0.35));
+}
+
+.zipper-pendant img {
+    display: block;
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+}
+
+.zipper-pendant.is-dragging {
+    cursor: grabbing;
+}
+
+/* ---- 漏出来的小虫子（Q版 claude / chatgpt / grok） ---- */
+.bug-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 64;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.zipper-bug {
+    position: absolute;
+    animation-name: bug-fall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+/* 线性 + 渐进关键帧 = 一出场就有速度的匀加速下落，全程无停顿 */
+@keyframes bug-fall {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(0deg) scale(0.85);
+    }
+
+    25% {
+        transform: translate(calc(var(--sway, 20px) * 0.45), calc(var(--fall, 600px) * 0.18)) rotate(calc(var(--rot, 180deg) * 0.3)) scale(1);
+    }
+
+    55% {
+        transform: translate(calc(var(--sway, 20px) * 0.5), calc(var(--fall, 600px) * 0.52)) rotate(calc(var(--rot, 180deg) * 0.6)) scale(1);
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(calc(var(--sway, 20px) * -0.4), var(--fall, 600px)) rotate(var(--rot, 180deg)) scale(1);
+    }
+}
+
+/* ---- 响应式微调 ---- */
+@media (max-width: 760px) {
+    .hero-title {
+        font-size: 12vw;
+    }
+
+    .hero-welcome {
+        top: 96px;
+        left: 6vw;
+    }
+
+    .hero-welcome-title {
+        font-size: 12.6vw;
+    }
+
+    .hero-welcome-sub {
+        font-size: 1.28rem;
+        letter-spacing: 0.22em;
+    }
+
+    .hero-name-char {
+        font-size: 17vw;
+    }
+
+    .hero-quotes {
+        height: 50vh;
+        top: 40%;
+        left: 6vw;
+    }
+
+    .hero-quote blockquote {
+        font-size: 1.34rem;
+    }
+
+    .hero-signature {
+        right: 6vw;
+        bottom: 9vh;
+    }
+
+    .zipper-pendant {
+        width: 46px;
+    }
+
+    .topnav-tabs {
+        right: 4px;
+        gap: 8px;
+    }
+
+    .sketch-tab {
+        padding: 7px 11px 8px;
+        font-size: 1.18rem;
+        gap: 6px;
+    }
+
+    .sketch-tab svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .nav-music-panel {
+        width: calc(100vw - 90px);
+    }
+
+    /* 手机上汉堡菜单展开时不被标签挡住 */
+    .topnav #main-menu {
+        padding-bottom: 8px;
+    }
+
+    body:not(.home) .main-container {
+        padding-top: 138px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .music-note {
+        display: none;
+    }
+}
+

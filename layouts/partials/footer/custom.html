@@ -10,6 +10,8 @@
         <path d="M5 12l7-7 7 7" />
     </svg>
 </button>
+
+{{- /* 拉链挂件已移至导航（见 partials/sidebar/left.html） */ -}}
 <script>
     (function () {
         /* 季节标签：emoji + 文案 */
@@ -77,18 +79,19 @@
             layer.className = 'petal-fall';
             layer.setAttribute('aria-hidden', 'true');
 
-            for (var i = 0; i < 12; i++) {
+            for (var i = 0; i < 34; i++) {
                 var item = document.createElement('span');
                 item.className = 'petal-fall-item';
                 var size = conf.min + Math.random() * (conf.max - conf.min);
-                item.style.left = (Math.random() * 100).toFixed(2) + '%';
+                item.style.left = (Math.random() * 108 + 2).toFixed(2) + '%';
                 item.style.width = size.toFixed(1) + 'px';
                 item.style.height = size.toFixed(1) + 'px';
                 item.style.opacity = (0.32 + Math.random() * 0.38).toFixed(2);
-                item.style.animationDuration = (12 + Math.random() * 12).toFixed(1) + 's';
-                item.style.animationDelay = (-Math.random() * 20).toFixed(1) + 's';
-                item.style.setProperty('--drift', (Math.random() * 140 - 70).toFixed(0) + 'px');
-                item.style.setProperty('--spin', (Math.random() * 720 - 360).toFixed(0) + 'deg');
+                item.style.animationDuration = (2.5 + Math.random() * 4).toFixed(1) + 's';
+                item.style.animationDelay = (-Math.random() * 8).toFixed(1) + 's';
+                /* 像刮大风：大幅向左下横扫 + 快速旋转 */
+                item.style.setProperty('--drift', (-(320 + Math.random() * 320)).toFixed(0) + 'px');
+                item.style.setProperty('--spin', (-(720 + Math.random() * 720)).toFixed(0) + 'deg');
                 if (conf.emoji) {
                     item.textContent = conf.emoji;
                     item.style.fontSize = size.toFixed(1) + 'px';
