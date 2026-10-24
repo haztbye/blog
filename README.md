@@ -94,6 +94,17 @@ hugo server
 - **首页全屏 Hero**（照片轮播 + 站名 + 语录）：`layouts/index.html` + `config/_default/params.toml` 里的 `[hero]`
 - **文章网格列表**：`assets/scss/custom.scss` 中的 `.article-grid`（首页 3 列 / 平板 2 列 / 手机 1 列）
 
+### 季节主题
+
+按月份自动切换（春樱粉 / 夏萤绿 / 秋叶橘 / 冬雪蓝），影响强调色、整页底色渐变、内页花瓣偏色、Hero 磨砂层与页脚季节标签。实现见 `layouts/partials/head/custom.html`（打 `data-season`）+ `custom.scss` 第 16 节。
+
+预览指定季节：网址后加 `?season=spring|summer|autumn|winter`。
+
+### 花海进度
+
+首页 Hero 下方显示「N / ∞ 个地方」+ 流动光带 + 花瓣（已点亮 = 当季色，未点亮 = 沙色）。
+地方清单在 `data/places.yaml`，每去一个新地方加一条即可，数字自动更新（字段：`name` / `note` / `article` / `year`）。
+
 ### 换照片、改语录
 
 1. 把照片放进 `static/img/hero/`（建议 **WebP、1600×900** 横图，命名 `slide-1.webp` 起，按顺序轮播）
@@ -101,7 +112,7 @@ hugo server
 
 ```toml
 [[hero.slides]]
-src = "/img/hero/slide-1.jpg"
+src = "/img/hero/slide-1.webp"
 
 [[hero.quotes]]
 text = "想写的话"

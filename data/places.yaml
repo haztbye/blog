@@ -1,0 +1,32 @@
+# 花海 · 地方清单
+#
+# 首页「花海」进度 = 这份清单的条数（N / ∞ 个地方），以后每去一个新地方就加一条。
+# 字段说明：
+#   name    地方名（必填）
+#   note    备注，比如「家」「实习」（可选）
+#   article 对应文章的目录名（content/post/<article>/index.md），没写文章就留空（可选）
+#   year    去的年份（可选）
+
+- name: 南大
+  note: 目标与方向
+  article: standing-before-nanjing-university
+
+- name: 图书馆
+  note: 备考日常
+
+- name: 海尔
+  note: 实习
+
+- name: 幂律
+  note: 实习
+
+- name: 临沂
+  note: 家
+
+- name: 洛阳
+
+- name: 西安
+
+- name: 北京
+
+- name: 洛杉矶

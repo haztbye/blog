@@ -233,30 +233,32 @@
 {{- $notHidden := where .Site.RegularPages "Params.hidden" "!=" true -}}
 {{- $filtered := ($pages | intersect $notHidden) -}}
 
-{{- /* 花海进度：一篇文章 = 一朵花 */ -}}
-{{- $flowerGoal := default 30 .Site.Params.flowersea.goal -}}
+{{- /* 花海进度：地方清单在 data/places.yaml，进度为 N / ∞ */ -}}
+{{- $places := .Site.Data.places -}}
+{{- $litPlaces := len $places -}}
 {{- $bloom := len $filtered -}}
 {{- $words := 0 -}}
 {{- range $filtered -}}{{- $words = add $words .WordCount -}}{{- end -}}
-{{- $pct := math.Round (math.Min 100 (mul (div (float $bloom) (float $flowerGoal)) 100)) -}}
-{{- $remain := sub $flowerGoal $bloom -}}
-{{- if lt $remain 0 -}}{{- $remain = 0 -}}{{- end -}}
 
 {{- $pag := .Paginate ($filtered) -}}
 <section class="home-latest" id="latest-posts">
     <section class="flower-progress" id="flower-progress" aria-label="花海进度">
         <div class="flower-progress-head">
             <h2 class="flower-progress-title">花海</h2>
-            <span class="flower-progress-count">{{ $bloom }} / {{ $flowerGoal }} 朵</span>
+            <span class="flower-progress-count">{{ $litPlaces }} / ∞ 个地方</span>
         </div>
-        <div class="flower-progress-bar"><span style="width: {{ $pct }}%"></span></div>
+        <div class="flower-progress-bar is-endless" role="presentation"><span></span></div>
         <div class="flower-progress-flowers" aria-hidden="true">
-            {{- range seq 1 $flowerGoal -}}
-                <span class="flower-progress-flower{{ if le . $bloom }} is-bloomed{{ end }}"></span>
+            {{- range $places -}}
+                <span class="flower-progress-flower is-bloomed" title="{{ .name }}{{ with .note }} · {{ . }}{{ end }}"></span>
             {{- end -}}
+            {{- range seq 1 5 -}}
+                <span class="flower-progress-flower"></span>
+            {{- end -}}
+            <span class="flower-progress-more">…</span>
         </div>
         <p class="flower-progress-note">
-            每一篇文章，都是路上开出的一朵花 · 已写下 {{ $words }} 字{{ if gt $remain 0 }} · 距满园还有 {{ $remain }} 朵{{ else }} · 花海已满园{{ end }}
+            已点亮 {{ $litPlaces }} 个地方 · 写下 {{ $bloom }} 篇文章、{{ $words }} 字 · 每一处新的风景，都会在这片花海里开出一朵
         </p>
     </section>
 
