@@ -1,3 +1,20 @@
+{{- /* 季节主题：按月份给 <html> 打上 data-season，CSS 据此换色；支持 ?season=spring 预览 */ -}}
+<script>
+    (function () {
+        var month = new Date().getMonth() + 1;
+        var season = (month >= 3 && month <= 5) ? 'spring'
+            : (month >= 6 && month <= 8) ? 'summer'
+            : (month >= 9 && month <= 11) ? 'autumn'
+            : 'winter';
+
+        var override = (window.location.search.match(/[?&]season=(spring|summer|autumn|winter)/) || [])[1];
+        if (override) {
+            season = override;
+        }
+        document.documentElement.setAttribute('data-season', season);
+    }());
+</script>
+
 {{- /* 额外的 head 内容：移动端浏览器地址栏配色、iOS 主屏图标 */ -}}
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f2fc">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e0c1e">

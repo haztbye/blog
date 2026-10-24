@@ -1,4 +1,8 @@
-{{- /* 自定义页脚内容：回到顶部按钮 */ -}}
+{{- /* 自定义页脚内容：季节标签 + 回到顶部按钮 */ -}}
+<span class="season-label" id="season-label" hidden>
+    <span class="season-emoji" aria-hidden="true">🌸</span>
+    <span class="season-text"></span>
+</span>
 <button id="back-to-top" type="button" aria-label="回到顶部" title="回到顶部">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8"
         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -8,6 +12,31 @@
 </button>
 <script>
     (function () {
+        /* 季节标签：emoji + 文案 */
+        var seasonInfo = {
+            spring: { emoji: '🌸', text: '春 · 樱' },
+            summer: { emoji: '🌿', text: '夏 · 萤' },
+            autumn: { emoji: '🍂', text: '秋 · 叶' },
+            winter: { emoji: '❄️', text: '冬 · 雪' }
+        };
+        var season = document.documentElement.getAttribute('data-season') || 'spring';
+        var info = seasonInfo[season] || seasonInfo.spring;
+
+        var label = document.getElementById('season-label');
+        if (label) {
+            label.hidden = false;
+            var emojiEl = label.querySelector('.season-emoji');
+            var textEl = label.querySelector('.season-text');
+            if (emojiEl) { emojiEl.textContent = info.emoji; }
+            if (textEl) { textEl.textContent = info.text; }
+        }
+
+        /* 页面里所有季节 emoji 占位（如花海进度的小花） */
+        Array.prototype.forEach.call(document.querySelectorAll('.season-emoji'), function (el) {
+            el.textContent = info.emoji;
+        });
+
+        /* 回到顶部 */
         var btn = document.getElementById('back-to-top');
         if (!btn) return;
 
