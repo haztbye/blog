@@ -3116,6 +3116,9 @@ body:not(.home) .main-container {
     animation-name: bug-fall;
     animation-timing-function: linear;
     animation-fill-mode: forwards;
+    /* 可以点掉：图层本身 pointer-events:none，这里单独打开 */
+    pointer-events: auto;
+    cursor: pointer;
 }
 
 /* 线性 + 渐进关键帧 = 一出场就有速度的匀加速下落，全程无停顿 */

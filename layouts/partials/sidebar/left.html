@@ -81,13 +81,14 @@
         <a class="sketch-tab sketch-tab--bilibili" href="https://space.bilibili.com/526970419" target="_blank" rel="noopener me" title="哔哩哔哩主页">
             {{ partial "helper/icon" "bilibili" }}<span>哔哩哔哩</span>
         </a>
+        {{- /* 邮箱 / 微信：Base64 存放，页面源码里搜不到明文，点击时才解码复制 */ -}}
         <button class="sketch-tab sketch-tab--mail js-copy" type="button"
-            data-copy="cheslieqdexx97#gmail.com" title="点击复制邮箱">
+            data-copy="Y2hlc2xpZXFkZXh4OTdAZ21haWwuY29t" title="点击复制邮箱">
             {{ partial "helper/icon" "email" }}<span class="sketch-tab-label">邮箱</span>
             <em class="sketch-tab-copied">已复制</em>
         </button>
         <button class="sketch-tab sketch-tab--wechat js-copy" type="button"
-            data-copy="zhangts9876" title="点击复制微信号：zhangts9876">
+            data-copy="emhhbmd0czk4NzY=" title="点击复制微信号">
             {{ partial "helper/icon" "wechat" }}<span class="sketch-tab-label">微信</span>
             <em class="sketch-tab-copied">已复制</em>
         </button>
@@ -112,15 +113,19 @@
         var statusEl = document.getElementById('music-status');
         if (!btn || !panel || !frame) return;
 
-        /* 歌单「miss」的曲目（单曲播放器只显示当前歌名，不带列表） */
+        /* 曲目来自 data/music.yaml —— 构建时由 tools/fetch-playlist.py 抓取歌单自动生成，
+           换歌后重新部署（或等每日自动刷新）就会跟着变，不用改代码 */
         var SONGS = [
-            { id: 535056564, name: '海の形' },
-            { id: 2155423469, name: '若我不曾见过太阳' },
-            { id: 2728871917, name: '爱你没差' },
-            { id: 548885986, name: '落空' },
-            { id: 30780496, name: 'Mine' },
-            { id: 3427276373, name: 'Left Alone' }
+            {{- $songs := .Site.Data.music -}}
+            {{- range $i, $song := $songs }}{{ if $i }},{{ end }}
+            { id: {{ $song.id | jsonify }}, name: {{ $song.name | jsonify }} }{{ end }}
         ];
+
+        /* 歌单里没有可播的歌（全 VIP / 抓取失败）→ 隐藏播放器按钮 */
+        if (!SONGS.length) {
+            if (btn.parentNode) { btn.parentNode.style.display = 'none'; }
+            return;
+        }
 
         var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var NOTES = ['♪', '♫', '♩', '♬'];
@@ -130,6 +135,7 @@
         var songIdx = 0;
 
         try { songIdx = parseInt(sessionStorage.getItem('music-idx') || '0', 10) || 0; } catch (e) { }
+        songIdx = ((songIdx % SONGS.length) + SONGS.length) % SONGS.length;
 
         function spawnNote() {
             if (reduce) return;
@@ -202,10 +208,12 @@
 
 <script>
     (function () {
-        /* 通用点击复制（邮箱 / 微信号） */
+        /* 通用点击复制（邮箱 / 微信号）：值是 Base64，页面源码里没有明文 */
         Array.prototype.forEach.call(document.querySelectorAll('.js-copy'), function (btn) {
             btn.addEventListener('click', function () {
-                var text = btn.getAttribute('data-copy');
+                var raw = btn.getAttribute('data-copy') || '';
+                try { raw = window.atob(raw); } catch (e) { /* 兼容旧的明文写法 */ }
+                var text = raw.replace('#', '@');
 
                 function done() {
                     btn.classList.add('is-copied');
@@ -213,10 +221,10 @@
                 }
 
                 if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(text.replace('#', '@')).then(done, done);
+                    navigator.clipboard.writeText(text).then(done, done);
                 } else {
                     var ta = document.createElement('textarea');
-                    ta.value = text.replace('#', '@');
+                    ta.value = text;
                     ta.setAttribute('readonly', '');
                     ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
                     document.body.appendChild(ta);
@@ -287,6 +295,24 @@
             zipper.style.setProperty('--zip', Math.min(100, Math.max(0, pct)).toFixed(2) + '%');
         }
 
+        /* 点一下就把虫子按掉：冻结当前下落位置，缩小淡出后移除 */
+        function killBug(img) {
+            if (!img || img.__dead) { return; }
+            img.__dead = true;
+            var current = window.getComputedStyle(img).transform;
+            img.style.animation = 'none';
+            if (current && current !== 'none') { img.style.transform = current; }
+            img.style.transition = 'transform 0.22s ease-in, opacity 0.22s ease-in';
+            window.requestAnimationFrame(function () {
+                img.style.transform = (current && current !== 'none' ? current + ' ' : '') + 'scale(0.15)';
+                img.style.opacity = '0';
+            });
+            window.setTimeout(function () {
+                if (img.parentNode) { img.remove(); }
+                bugAlive = Math.max(0, bugAlive - 1);
+            }, 260);
+        }
+
         function spawnBug() {
             if (!bugLayer || bugAlive >= MAX_ALIVE) return false;
 
@@ -312,7 +338,16 @@
             img.style.animationDuration = (1.5 + Math.random() * 1.3).toFixed(2) + 's';
             bugLayer.appendChild(img);
             bugAlive++;
-            img.addEventListener('animationend', function () { img.remove(); bugAlive--; });
+            img.addEventListener('animationend', function () {
+                if (img.__dead) { return; }
+                img.remove();
+                bugAlive--;
+            });
+            img.addEventListener('pointerdown', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                killBug(img);
+            });
             return true;
         }
 

@@ -1,0 +1,101 @@
+{{- /* PJAX：站内跳转只替换 #pjax-root，导航（含音乐播放器 iframe）保持不变，
+       所以切页面时音乐不会断。页面内的 <script> 会被重新执行。 */ -}}
+<script>
+    (function () {
+        var root = document.getElementById('pjax-root');
+        if (!root || !window.fetch || !window.history || !window.history.pushState) return;
+
+        var loading = false;
+
+        function eligible(a) {
+            if (!a || !a.getAttribute) return false;
+            var href = a.getAttribute('href');
+            if (!href || href.charAt(0) === '#') return false;
+            if (a.target && a.target !== '_self') return false;
+            if (a.hasAttribute('download') || a.hasAttribute('data-no-pjax')) return false;
+            if (a.host !== location.host) return false;
+            if (a.pathname === location.pathname && a.search === location.search) return false;
+            if (a.pathname.indexOf('/me/') === 0) return false;
+            if (/\.(xml|json|txt|zip|png|jpe?g|webp|gif|svg|ico|pdf|mp3|css|js)$/i.test(a.pathname)) return false;
+            return true;
+        }
+
+        function syncNav(url) {
+            var path = url.pathname.replace(/index\.html$/, '');
+            Array.prototype.forEach.call(document.querySelectorAll('#main-menu a, .topnav-brand'), function (a) {
+                var p = a.pathname.replace(/index\.html$/, '');
+                var active = (p === '/' ? path === '/' : path.indexOf(p) === 0);
+                if (a.classList.contains('topnav-brand')) { return; }
+                a.classList.toggle('is-active', active);
+                if (active) { a.setAttribute('aria-current', 'page'); } else { a.removeAttribute('aria-current'); }
+            });
+        }
+
+        /* 让新内容里的 <script> 重新执行（innerHTML 插入的脚本不会自动跑） */
+        function runScripts(scope) {
+            Array.prototype.forEach.call(scope.querySelectorAll('script'), function (old) {
+                var fresh = document.createElement('script');
+                Array.prototype.forEach.call(old.attributes, function (attr) {
+                    fresh.setAttribute(attr.name, attr.value);
+                });
+                fresh.text = old.textContent;
+                old.parentNode.replaceChild(fresh, old);
+            });
+        }
+
+        function apply(doc, url) {
+            var next = doc.getElementById('pjax-root');
+            if (!next) { location.href = url.href; return; }
+
+            document.body.className = doc.body.className;
+            if (doc.title) { document.title = doc.title; }
+            var desc = doc.querySelector('meta[name="description"]');
+            var here = document.querySelector('meta[name="description"]');
+            if (desc && here) { here.setAttribute('content', desc.getAttribute('content')); }
+
+            root.innerHTML = next.innerHTML;
+            runScripts(root);
+            syncNav(url);
+
+            if (url.hash) {
+                var target = document.getElementById(url.hash.slice(1));
+                if (target) { target.scrollIntoView(); } else { window.scrollTo(0, 0); }
+            } else {
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function load(url, push) {
+            if (loading) return;
+            loading = true;
+            document.documentElement.classList.add('pjax-loading');
+            fetch(url.href, { credentials: 'same-origin' })
+                .then(function (resp) {
+                    if (!resp.ok) { throw new Error('HTTP ' + resp.status); }
+                    return resp.text();
+                })
+                .then(function (htmlText) {
+                    var doc = new DOMParser().parseFromString(htmlText, 'text/html');
+                    if (push) { history.pushState({ pjax: 1 }, '', url.href); }
+                    apply(doc, url);
+                })
+                .catch(function () { location.href = url.href; })
+                .then(function () {
+                    loading = false;
+                    document.documentElement.classList.remove('pjax-loading');
+                });
+        }
+
+        document.addEventListener('click', function (e) {
+            if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            var a = e.target && e.target.closest ? e.target.closest('a') : null;
+            if (!eligible(a)) return;
+            e.preventDefault();
+            load(new URL(a.href, location.href), true);
+        });
+
+        window.addEventListener('popstate', function () {
+            load(new URL(location.href), false);
+        });
+    }());
+</script>

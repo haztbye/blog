@@ -75,14 +75,11 @@
             };
             var conf = shapes[season] || shapes.spring;
 
-            var layerEl = null;
             var lastSmall = null;
 
             function build() {
-                if (layerEl) {
-                    layerEl.remove();
-                    layerEl = null;
-                }
+                /* PJAX 换页后本脚本会再执行一次：先清掉旧图层，避免花瓣叠加 */
+                Array.prototype.forEach.call(document.querySelectorAll('.petal-fall'), function (el) { el.remove(); });
                 if (reduce) { return; }
 
                 var isSmall = window.innerWidth < 760;
@@ -119,39 +116,45 @@
                 }
 
                 document.body.appendChild(layer);
-                layerEl = layer;
             }
 
+            window.__hhPetalBuild = build;
             build();
 
-            /* 手机横竖屏切换 / 窗口跨过断点时重建，避免数量不合适 */
-            var resizeTimer = 0;
-            window.addEventListener('resize', function () {
-                var isSmall = window.innerWidth < 760;
-                if (isSmall === lastSmall) { return; }
-                window.clearTimeout(resizeTimer);
-                resizeTimer = window.setTimeout(build, 200);
-            });
+            /* 手机横竖屏切换 / 跨断点时重建（全局只注册一次，PJAX 换页不会重复叠加监听） */
+            if (!window.__hhPetalResizeBound) {
+                window.__hhPetalResizeBound = true;
+                window.__hhPetalResizeTimer = 0;
+                window.addEventListener('resize', function () {
+                    window.clearTimeout(window.__hhPetalResizeTimer);
+                    window.__hhPetalResizeTimer = window.setTimeout(function () {
+                        if (window.__hhPetalBuild) { window.__hhPetalBuild(); }
+                    }, 200);
+                });
+            }
         }());
 
-        /* 回到顶部 */
-        var btn = document.getElementById('back-to-top');
-        if (!btn) return;
+        /* 回到顶部：事件委托 + 全局只注册一次，PJAX 换页后依旧有效 */
+        if (!window.__hhBackTopBound) {
+            window.__hhBackTopBound = true;
+            var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+            window.__hhBackTopUpdate = function () {
+                var b = document.getElementById('back-to-top');
+                if (b) { b.classList.toggle('show', window.scrollY > 420); }
+            };
 
-        function update() {
-            btn.classList.toggle('show', window.scrollY > 420);
-        }
+            window.addEventListener('scroll', window.__hhBackTopUpdate, { passive: true });
 
-        window.addEventListener('scroll', update, { passive: true });
-        update();
-
-        btn.addEventListener('click', function () {
-            window.scrollTo({
-                top: 0,
-                behavior: reduceMotion.matches ? 'auto' : 'smooth'
+            document.addEventListener('click', function (e) {
+                var b = e.target && e.target.closest ? e.target.closest('#back-to-top') : null;
+                if (!b) { return; }
+                window.scrollTo({
+                    top: 0,
+                    behavior: reduceMotion.matches ? 'auto' : 'smooth'
+                });
             });
-        });
+        }
+        if (window.__hhBackTopUpdate) { window.__hhBackTopUpdate(); }
     }());
 </script>

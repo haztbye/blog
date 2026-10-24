@@ -55,13 +55,21 @@
         var hero = document.getElementById('hero');
         if (!hero) return;
 
+        /* PJAX 换页后本脚本会重新执行：用 token 让上一轮的轮播 / 打字循环自动退出 */
+        var heroToken = (window.__hhHeroToken = (window.__hhHeroToken || 0) + 1);
+        function stale() { return window.__hhHeroToken !== heroToken; }
+
         var nav = document.getElementById('topnav');
         if (nav) {
-            var onScroll = function () {
-                nav.classList.toggle('scrolled', window.scrollY > 24);
-            };
-            window.addEventListener('scroll', onScroll, { passive: true });
-            onScroll();
+            /* 全局只注册一次滚动监听，PJAX 反复进出首页不会叠加 */
+            if (!window.__hhNavScroll) {
+                window.__hhNavScroll = function () {
+                    var n = document.getElementById('topnav');
+                    if (n) { n.classList.toggle('scrolled', window.scrollY > 24); }
+                };
+                window.addEventListener('scroll', window.__hhNavScroll, { passive: true });
+            }
+            window.__hhNavScroll();
         }
 
         var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -108,7 +116,7 @@
             if (!reduceMotion && slideGroups[0].length > 1) {
                 var si = slideStart;
                 window.setInterval(function () {
-                    if (document.hidden) return;
+                    if (document.hidden || stale()) return;
                     si = (si + 1) % slideGroups[0].length;
                     setActiveSlide(si);
                 }, slideInterval);
@@ -168,6 +176,7 @@
         }
 
         function runQuotes(index) {
+            if (stale()) { return Promise.resolve(); }
             var item = quoteData[index];
             var next = (index + 1) % quoteData.length;
 
@@ -209,7 +218,7 @@
                 quoteEls.forEach(function (el) { el.classList.remove('is-active'); });
                 quoteEls[qi].classList.add('is-active');
                 window.setInterval(function () {
-                    if (document.hidden) return;
+                    if (document.hidden || stale()) return;
                     quoteEls[qi].classList.remove('is-active');
                     qi = (qi + 1) % quoteEls.length;
                     quoteEls[qi].classList.add('is-active');
