@@ -75,11 +75,11 @@ enabled = true
 enabled = true
 
 ## Comments
-# Disqus 用的是主题作者的演示 shortname，且国内网络基本加载不出来，
-# 先关闭以免文章底部留一块空白；以后可以换成 giscus / waline 再打开。
+# 使用 giscus：评论存在 GitHub Discussions（公开仓库，免费、无广告、无追踪）
+# 单篇文章想关掉评论区：在该文章 front matter 写 comments: false
 [comments]
-enabled = false
-provider = "disqus"
+enabled = true
+provider = "giscus"
 
 [comments.disqusjs]
 shortname = ""
@@ -130,15 +130,19 @@ serverName = "cactus.chat"
 siteName = ""
 
 [comments.giscus]
-repo = ""
-repoID = ""
-category = ""
-categoryID = ""
-mapping = ""
-lightTheme = ""
-darkTheme = ""
+repo = "haztbye/blog"
+repoID = "R_kgDOVUbRYA"
+category = "Announcements"
+categoryID = "DIC_kwDOVUbRYM4DJfwB"
+mapping = "pathname"
+strict = 0
+lightTheme = "light"
+darkTheme = "dark_dimmed"
 reactionsEnabled = 1
 emitMetadata = 0
+inputPosition = "bottom"
+lang = "zh-CN"
+loading = "lazy"
 
 [comments.gitalk]
 owner = ""

@@ -2350,6 +2350,41 @@ html[data-season] .tagCloud .tagCloud-tags a:hover {
     background-image: linear-gradient(120deg, var(--season-accent), var(--tw-pink));
 }
 
+/* 季节飘落花瓣（数量很少，移动端与"减少动态"下不显示） */
+.petal-fall {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.petal-fall-item {
+    position: absolute;
+    top: -8%;
+    display: block;
+    animation-name: petal-fall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
+}
+
+.petal-fall-item svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+@keyframes petal-fall {
+    0% {
+        transform: translate3d(0, -10vh, 0) rotate(0deg);
+    }
+
+    100% {
+        transform: translate3d(var(--drift, 40px), 112vh, 0) rotate(var(--spin, 360deg));
+    }
+}
+
 /* ==========================================================================
    17. 花海进度（首页）
    ========================================================================== */
@@ -2490,5 +2525,209 @@ html[data-season] .tagCloud .tagCloud-tags a:hover {
     .flower-progress-bar.is-endless {
         animation: none;
         background-position: 0 0;
+    }
+}
+
+/* ==========================================================================
+   18. 花海专题页（/flower/）
+   ========================================================================== */
+
+body.template-flower .main-container {
+    max-width: 1080px;
+}
+
+.flower-page {
+    width: 100%;
+}
+
+.flower-hero {
+    margin-bottom: 22px;
+}
+
+.flower-title {
+    margin: 0;
+    font-family: var(--tw-font-display);
+    font-size: 3rem;
+    letter-spacing: 0.16em;
+    color: var(--card-text-color-main);
+}
+
+.flower-desc {
+    margin: 10px 0 0;
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    color: var(--card-text-color-secondary);
+}
+
+.flower-count {
+    margin: 8px 0 0;
+    font-size: 1.3rem;
+    letter-spacing: 0.06em;
+    color: var(--season-accent);
+}
+
+.flower-count strong {
+    font-size: 1.6rem;
+}
+
+/* 沙漠插画 */
+.flower-map {
+    position: relative;
+    aspect-ratio: 1200 / 680;
+    border-radius: 24px;
+    overflow: hidden;
+    background-color: #241d4a;
+    box-shadow: var(--tw-shadow-card);
+}
+
+.flower-map-svg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.flower-map-places {
+    position: absolute;
+    inset: 0;
+}
+
+.flower-place {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transform: translate(-50%, -50%);
+}
+
+.flower-place-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: inherit;
+}
+
+.flower-place-bloom {
+    display: block;
+    width: 42px;
+    height: 42px;
+    filter: drop-shadow(0 6px 14px rgba(30, 16, 8, 0.45));
+    transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+.flower-place-bloom svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.flower-petals {
+    fill: var(--season-accent);
+}
+
+.flower-core {
+    fill: #fff4dd;
+}
+
+.flower-place-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background-color: rgba(24, 14, 34, 0.5);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    white-space: nowrap;
+}
+
+.flower-place-name {
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+    color: #fff;
+}
+
+.flower-place-note {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.flower-place:hover .flower-place-bloom,
+.flower-place:focus-within .flower-place-bloom {
+    filter: drop-shadow(0 8px 20px rgba(255, 210, 140, 0.6));
+    transform: scale(1.18) rotate(6deg);
+}
+
+.flower-place-link:hover .flower-place-label {
+    background-color: rgba(40, 20, 50, 0.72);
+}
+
+/* 地点清单（手机 / 快速跳转用） */
+.flower-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 22px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.flower-list li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 1.24rem;
+    color: var(--card-text-color-secondary);
+    background-color: var(--tw-glass-bg);
+    border: 1px solid var(--tw-glass-border);
+}
+
+.flower-list a {
+    color: var(--card-text-color-main);
+}
+
+.flower-list a:hover {
+    color: var(--season-accent);
+}
+
+.flower-list-note {
+    font-size: 1.1rem;
+    color: var(--card-text-color-tertiary);
+}
+
+.flower-list-arrow {
+    color: var(--season-accent);
+}
+
+@media (max-width: 760px) {
+    .flower-title {
+        font-size: 2.3rem;
+    }
+
+    .flower-map {
+        aspect-ratio: 1200 / 760;
+    }
+
+    .flower-place-bloom {
+        width: 30px;
+        height: 30px;
+    }
+
+    .flower-place-label {
+        padding: 3px 8px;
+    }
+
+    .flower-place-name {
+        font-size: 1.05rem;
+    }
+
+    .flower-place-note {
+        display: none;
     }
 }

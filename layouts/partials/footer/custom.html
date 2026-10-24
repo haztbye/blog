@@ -36,6 +36,46 @@
             el.textContent = info.emoji;
         });
 
+        /* 季节飘落花瓣：一点点，够味道就行 */
+        (function () {
+            var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reduce || window.innerWidth < 760) return;
+
+            var season = document.documentElement.getAttribute('data-season') || 'spring';
+            var shapes = {
+                spring: { path: 'M12 2c3.2 4.4 8 6.8 8 12a8 8 0 0 1-16 0c0-5.2 4.8-7.6 8-12z', fill: '#f7b8d3' },
+                summer: { path: 'M12 3c6.5 4 8.5 11.5 0 18-8.5-6.5-6.5-14 0-18z', fill: '#8ed7a9' },
+                autumn: { path: 'M12 2l2.2 5.6L20 6l-2.6 5.2L22 13l-5.4 1.2L18 20l-6-3.4L6 20l1.4-5.8L2 13l4.6-1.8L4 6l5.8 1.6z', fill: '#e08a3c' },
+                winter: { path: '', fill: '#cfe0ff', stroke: true }
+            };
+            var conf = shapes[season] || shapes.spring;
+
+            var layer = document.createElement('div');
+            layer.className = 'petal-fall';
+            layer.setAttribute('aria-hidden', 'true');
+
+            for (var i = 0; i < 12; i++) {
+                var item = document.createElement('span');
+                item.className = 'petal-fall-item';
+                var size = 11 + Math.random() * 11;
+                item.style.left = (Math.random() * 100).toFixed(2) + '%';
+                item.style.width = size.toFixed(1) + 'px';
+                item.style.height = size.toFixed(1) + 'px';
+                item.style.opacity = (0.32 + Math.random() * 0.38).toFixed(2);
+                item.style.animationDuration = (12 + Math.random() * 12).toFixed(1) + 's';
+                item.style.animationDelay = (-Math.random() * 20).toFixed(1) + 's';
+                item.style.setProperty('--drift', (Math.random() * 140 - 70).toFixed(0) + 'px');
+                item.style.setProperty('--spin', (Math.random() * 720 - 360).toFixed(0) + 'deg');
+                item.innerHTML = conf.stroke
+                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="' + conf.fill + '" stroke-width="1.6" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7"/></svg>'
+                    : '<svg viewBox="0 0 24 24"><path d="' + conf.path + '" fill="' + conf.fill + '"' +
+                    (season === 'autumn' ? ' stroke="#b5651d" stroke-width="0.9" stroke-linejoin="round"' : '') + '/></svg>';
+                layer.appendChild(item);
+            }
+
+            document.body.appendChild(layer);
+        }());
+
         /* 回到顶部 */
         var btn = document.getElementById('back-to-top');
         if (!btn) return;

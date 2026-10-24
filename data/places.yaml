@@ -1,32 +1,53 @@
 # 花海 · 地方清单
 #
-# 首页「花海」进度 = 这份清单的条数（N / ∞ 个地方），以后每去一个新地方就加一条。
+# 首页「花海」进度 = 这份清单的条数（N / ∞ 个地方），
+# 花海专题页（/flower/）按 x / y 坐标把这些地方画在沙漠插画上。
+#
 # 字段说明：
 #   name    地方名（必填）
 #   note    备注，比如「家」「实习」（可选）
 #   article 对应文章的目录名（content/post/<article>/index.md），没写文章就留空（可选）
 #   year    去的年份（可选）
+#   x / y   在插画上的位置，百分比（左上为 0,0）
+
+- name: 临沂
+  note: 家
+  x: 9
+  y: 72
+
+- name: 图书馆
+  note: 备考日常
+  x: 20
+  y: 65
 
 - name: 南大
   note: 目标与方向
   article: standing-before-nanjing-university
-
-- name: 图书馆
-  note: 备考日常
+  x: 31
+  y: 71
 
 - name: 海尔
   note: 实习
+  x: 43
+  y: 62
 
 - name: 幂律
   note: 实习
-
-- name: 临沂
-  note: 家
+  x: 54
+  y: 68
 
 - name: 洛阳
+  x: 65
+  y: 57
 
 - name: 西安
+  x: 74
+  y: 64
 
 - name: 北京
+  x: 83
+  y: 55
 
 - name: 洛杉矶
+  x: 91
+  y: 61
