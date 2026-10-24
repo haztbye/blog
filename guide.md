@@ -58,13 +58,6 @@ git push
 
 ⚠️ 在宝塔面板里"保存"站点设置可能会覆盖这些改动；如果发现 CSS/JS 的缓存头变回 12h，说一声重新加即可。
 
-## 私有学习面板（/me/）
-
-- 地址：`https://huanhe.site/me/`，Nginx 基本认证（密码文件 `*.htpasswd`，见 `blogger/private/README.md`）
-- 数据与生成脚本在 **仓库之外**：`blogger/private/`（`study.json` → `build_study.py` → `dist/index.html` → scp 上传）
-- 服务器目录：旧服务器 `/www/wwwroot/private/`；腾讯新服务器用 `/var/www/private/`
-- ⚠️ 服务器上的 Nginx `/me/` 配置**不在 git 里**，换服务器后要重新加一次（含 `.htpasswd`）
-
 ## 目录说明
 
 - `content/`：文章与页面（`post/` 文章，`page/` 归档/搜索/关于）
