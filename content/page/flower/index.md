@@ -1,6 +1,6 @@
 ---
 title: 花海
-description: 这里会放一张我自己画的花海地图——画好之后，走过的地方一朵朵点上去
+description: 这里会放一张我自己画的花海地图
 slug: flower
 layout: flower
 date: 2026-10-24
