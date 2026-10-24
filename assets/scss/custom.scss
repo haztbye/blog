@@ -2478,6 +2478,19 @@ html[data-season] .tagCloud .tagCloud-tags a:hover {
     }
 }
 
+/* 手机浏览器地址栏收放会改变可视高度，dvh 更准确（支持才生效，避免旧浏览器解析失败） */
+@supports (height: 100dvh) {
+    @keyframes petal-fall {
+        0% {
+            transform: translate3d(0, -10dvh, 0) rotate(0deg);
+        }
+
+        100% {
+            transform: translate3d(var(--drift, 40px), 112dvh, 0) rotate(var(--spin, 360deg));
+        }
+    }
+}
+
 /* ==========================================================================
    17. 花海进度（首页）
    ========================================================================== */
@@ -3206,6 +3219,114 @@ body:not(.home) .main-container {
 @media (prefers-reduced-motion: reduce) {
     .music-note {
         display: none;
+    }
+}
+
+/* 窄屏：贴纸标签只留图标，避免挤出屏幕（手机上文字会换行/被切掉） */
+@media (max-width: 560px) {
+    .topnav-tabs {
+        right: 6px;
+        gap: 7px;
+        max-width: calc(100% - 12px);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .topnav-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .sketch-tab {
+        gap: 0;
+        padding: 8px 10px;
+        transform: rotate(-1.2deg);
+    }
+
+    .sketch-tab>span {
+        display: none;
+    }
+
+    .sketch-tab svg {
+        width: 19px;
+        height: 19px;
+    }
+
+    /* 复制成功后要能看到提示，所以「已复制」保持显示 */
+    .sketch-tab.is-copied .sketch-tab-copied {
+        display: inline;
+        font-size: 1.1rem;
+    }
+}
+
+/* ==========================================================================
+   20. 花海占位页（/flower/ · 待开发，等一张自己画的地图）
+   ========================================================================== */
+
+body.template-flower .main-container {
+    max-width: 720px;
+}
+
+.flower-wip {
+    padding: 60px 26px 68px;
+    border-radius: 24px;
+    text-align: center;
+    background-color: var(--tw-glass-bg);
+    -webkit-backdrop-filter: var(--tw-glass-blur);
+    backdrop-filter: var(--tw-glass-blur);
+    border: 1px solid var(--tw-glass-border);
+    box-shadow: var(--tw-shadow-card);
+}
+
+.flower-wip-emoji {
+    margin: 0;
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.flower-wip-title {
+    margin: 12px 0 0;
+    font-family: var(--tw-font-display);
+    font-size: 2.6rem;
+    letter-spacing: 0.2em;
+    color: var(--card-text-color-main);
+}
+
+.flower-wip-status {
+    display: inline-block;
+    margin: 18px 0 0;
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-size: 1.3rem;
+    letter-spacing: 0.22em;
+    color: var(--season-accent);
+    background-color: var(--season-accent-soft);
+    border: 1px dashed var(--season-accent);
+}
+
+.flower-wip-note {
+    max-width: 460px;
+    margin: 18px auto 0;
+    font-size: 1.32rem;
+    line-height: 1.95;
+    color: var(--card-text-color-tertiary);
+}
+
+.flower-wip-back {
+    display: inline-block;
+    margin-top: 22px;
+    font-size: 1.3rem;
+    letter-spacing: 0.08em;
+    color: var(--accent-color);
+}
+
+@media (max-width: 760px) {
+    .flower-wip {
+        padding: 44px 18px 52px;
+    }
+
+    .flower-wip-title {
+        font-size: 2.1rem;
     }
 }
 

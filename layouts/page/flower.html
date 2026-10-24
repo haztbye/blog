@@ -1,0 +1,13 @@
+{{ define "body-class" }}template-flower{{ end }}
+
+{{ define "main" }}
+<section class="flower-wip">
+    <p class="flower-wip-emoji" aria-hidden="true">🚧</p>
+    <h1 class="flower-wip-title">{{ .Title }}</h1>
+    <p class="flower-wip-status">待开发</p>
+    <p class="flower-wip-note">{{ with .Params.description }}{{ . }}{{ else }}这一页会放一张自己画的花海地图{{ end }}</p>
+    <a class="flower-wip-back" href="{{ "/" | relURL }}">← 先回首页看看</a>
+</section>
+
+{{ partialCached "footer/footer" . }}
+{{ end }}

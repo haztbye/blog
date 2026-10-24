@@ -38,10 +38,10 @@
             el.textContent = info.emoji;
         });
 
-        /* 季节飘落叶片：春樱瓣 / 夏绿叶 / 秋枫叶 / 冬雪花（每种随机取同系三种色） */
+        /* 季节飘落叶片：春樱瓣 / 夏绿叶 / 秋枫叶 / 冬雪花（每种随机取同系三种色）
+           桌面多、手机少而小（手机上也要有，只是更省性能） */
         (function () {
             var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            if (reduce || window.innerWidth < 760) return;
 
             var season = document.documentElement.getAttribute('data-season') || 'spring';
 
@@ -75,35 +75,63 @@
             };
             var conf = shapes[season] || shapes.spring;
 
-            var layer = document.createElement('div');
-            layer.className = 'petal-fall';
-            layer.setAttribute('aria-hidden', 'true');
+            var layerEl = null;
+            var lastSmall = null;
 
-            for (var i = 0; i < 34; i++) {
-                var item = document.createElement('span');
-                item.className = 'petal-fall-item';
-                var size = conf.min + Math.random() * (conf.max - conf.min);
-                item.style.left = (Math.random() * 108 + 2).toFixed(2) + '%';
-                item.style.width = size.toFixed(1) + 'px';
-                item.style.height = size.toFixed(1) + 'px';
-                item.style.opacity = (0.32 + Math.random() * 0.38).toFixed(2);
-                item.style.animationDuration = (2.5 + Math.random() * 4).toFixed(1) + 's';
-                item.style.animationDelay = (-Math.random() * 8).toFixed(1) + 's';
-                /* 像刮大风：大幅向左下横扫 + 快速旋转 */
-                item.style.setProperty('--drift', (-(320 + Math.random() * 320)).toFixed(0) + 'px');
-                item.style.setProperty('--spin', (-(720 + Math.random() * 720)).toFixed(0) + 'deg');
-                if (conf.emoji) {
-                    item.textContent = conf.emoji;
-                    item.style.fontSize = size.toFixed(1) + 'px';
-                    item.style.lineHeight = size.toFixed(1) + 'px';
-                    item.style.textAlign = 'center';
-                } else {
-                    item.innerHTML = conf.svg();
+            function build() {
+                if (layerEl) {
+                    layerEl.remove();
+                    layerEl = null;
                 }
-                layer.appendChild(item);
+                if (reduce) { return; }
+
+                var isSmall = window.innerWidth < 760;
+                lastSmall = isSmall;
+                var count = isSmall ? 14 : 34;   /* 手机上少一半以上 */
+                var scale = isSmall ? 0.8 : 1;   /* 手机上也小一号 */
+
+                var layer = document.createElement('div');
+                layer.className = 'petal-fall';
+                layer.setAttribute('aria-hidden', 'true');
+
+                for (var i = 0; i < count; i++) {
+                    var item = document.createElement('span');
+                    item.className = 'petal-fall-item';
+                    var size = (conf.min + Math.random() * (conf.max - conf.min)) * scale;
+                    item.style.left = (Math.random() * 108 + 2).toFixed(2) + '%';
+                    item.style.width = size.toFixed(1) + 'px';
+                    item.style.height = size.toFixed(1) + 'px';
+                    item.style.opacity = (0.32 + Math.random() * 0.38).toFixed(2);
+                    item.style.animationDuration = (2.5 + Math.random() * 4).toFixed(1) + 's';
+                    item.style.animationDelay = (-Math.random() * 8).toFixed(1) + 's';
+                    /* 像刮大风：大幅向左下横扫 + 快速旋转（手机上幅度小一点） */
+                    item.style.setProperty('--drift', (-(320 + Math.random() * 320) * (isSmall ? 0.7 : 1)).toFixed(0) + 'px');
+                    item.style.setProperty('--spin', (-(720 + Math.random() * 720)).toFixed(0) + 'deg');
+                    if (conf.emoji) {
+                        item.textContent = conf.emoji;
+                        item.style.fontSize = size.toFixed(1) + 'px';
+                        item.style.lineHeight = size.toFixed(1) + 'px';
+                        item.style.textAlign = 'center';
+                    } else {
+                        item.innerHTML = conf.svg();
+                    }
+                    layer.appendChild(item);
+                }
+
+                document.body.appendChild(layer);
+                layerEl = layer;
             }
 
-            document.body.appendChild(layer);
+            build();
+
+            /* 手机横竖屏切换 / 窗口跨过断点时重建，避免数量不合适 */
+            var resizeTimer = 0;
+            window.addEventListener('resize', function () {
+                var isSmall = window.innerWidth < 760;
+                if (isSmall === lastSmall) { return; }
+                window.clearTimeout(resizeTimer);
+                resizeTimer = window.setTimeout(build, 200);
+            });
         }());
 
         /* 回到顶部 */
