@@ -252,7 +252,7 @@
         <div class="flower-progress-bar"><span style="width: {{ $pct }}%"></span></div>
         <div class="flower-progress-flowers" aria-hidden="true">
             {{- range seq 1 $flowerGoal -}}
-                <span class="flower-progress-flower season-emoji{{ if le . $bloom }} is-bloomed{{ end }}">🌸</span>
+                <span class="flower-progress-flower{{ if le . $bloom }} is-bloomed{{ end }}"></span>
             {{- end -}}
         </div>
         <p class="flower-progress-note">
