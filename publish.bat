@@ -7,6 +7,8 @@ REM ASCII only in this file.
 REM Publish = commit + push. GitHub Actions builds and deploys to the server.
 REM Usage: publish.bat            (default commit message)
 REM        publish.bat "message"  (custom commit message)
+REM No local changes? It still makes an empty commit, so the site rebuilds
+REM (useful after adding songs to the NetEase playlist).
 
 set "MSG=%~1"
 if "%MSG%"=="" set "MSG=update: publish from local"
@@ -17,7 +19,9 @@ if errorlevel 1 goto :fail
 
 git diff --cached --quiet
 if %ERRORLEVEL%==0 (
-    echo   nothing to commit
+    echo   nothing changed - empty commit to trigger a fresh build
+    git commit --allow-empty -m "chore: refresh site data"
+    if errorlevel 1 goto :fail
     goto :push
 )
 
