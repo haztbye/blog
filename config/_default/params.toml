@@ -7,6 +7,8 @@ favicon = "/favicon.png"
 [footer]
 since = 2020
 customText = "愿我们都在去看花海的路上 🌸"
+# 备案号（工信部要求：网站底部展示并链接到 beian.miit.gov.cn）
+icp = "鲁ICP备2025184710号-1"
 
 [dateFormat]
 published = "2006 年 01 月 02 日"
