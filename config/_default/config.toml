@@ -12,4 +12,5 @@ defaultContentLanguage = "zh-cn"
 hasCJKLanguage = true
 
 [pagination]
-pagerSize = 5
+# 每页 15 篇 = 首页/列表页网格 5 行 × 3 列，正好铺满不留空位
+pagerSize = 15
