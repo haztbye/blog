@@ -57,7 +57,24 @@
                         <span class="music-status" id="music-status">正在播放</span>
                         <button type="button" id="music-next" aria-label="下一首" title="下一首">▶</button>
                     </div>
-                    <iframe id="music-frame" title="网易云音乐播放器" frameborder="0" allow="autoplay"></iframe>
+                    {{- /* 自建播放条：直接播网易外链音频地址。
+                           原先用网易的 iframe 播放器，在跨站环境里会报「资源加载失败」，故弃用 */ -}}
+                    <div class="music-bar">
+                        <button type="button" class="music-toggle" id="music-toggle" aria-label="播放 / 暂停" title="播放 / 暂停">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                                <path class="music-ico-play" d="M8 5.2v13.6L19 12z" />
+                                <g class="music-ico-pause">
+                                    <rect x="7" y="5" width="3.4" height="14" rx="1.2" />
+                                    <rect x="13.6" y="5" width="3.4" height="14" rx="1.2" />
+                                </g>
+                            </svg>
+                        </button>
+                        <div class="music-progress" id="music-progress" aria-label="播放进度" role="slider" tabindex="0">
+                            <i id="music-progress-fill"></i>
+                        </div>
+                        <span class="music-time" id="music-time">0:00</span>
+                    </div>
+                    <audio id="music-audio" preload="none"></audio>
                 </div>
             </li>
 
@@ -109,16 +126,21 @@
     (function () {
         var btn = document.getElementById('nav-music-btn');
         var panel = document.getElementById('nav-music-panel');
-        var frame = document.getElementById('music-frame');
+        var audio = document.getElementById('music-audio');
         var statusEl = document.getElementById('music-status');
-        if (!btn || !panel || !frame) return;
+        var toggle = document.getElementById('music-toggle');
+        var bar = document.getElementById('music-progress');
+        var fill = document.getElementById('music-progress-fill');
+        var timeEl = document.getElementById('music-time');
+        if (!btn || !panel || !audio) return;
 
         /* 曲目来自 data/music.yaml —— 构建时由 tools/fetch-playlist.py 抓取歌单自动生成，
-           换歌后重新部署（或等每日自动刷新）就会跟着变，不用改代码 */
+           换歌后重新部署（或等每日自动刷新）就会跟着变，不用改代码。
+           注意：<script> 里 Hugo 会自动把字符串转成合法 JS 字面量，**不要再套 jsonify**（会双重编码出引号） */
         var SONGS = [
             {{- $songs := .Site.Data.music -}}
             {{- range $i, $song := $songs }}{{ if $i }},{{ end }}
-            { id: {{ $song.id | jsonify }}, name: {{ $song.name | jsonify }} }{{ end }}
+            { id: {{ $song.id }}, name: {{ $song.name }} }{{ end }}
         ];
 
         /* 歌单里没有可播的歌（全 VIP / 抓取失败）→ 隐藏播放器按钮 */
@@ -129,13 +151,26 @@
 
         var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var NOTES = ['♪', '♫', '♩', '♬'];
-        var idx = 0;
+        /* 网易外链音频地址：直接给 <audio> 播，不用它的 iframe 播放器 */
+        var OUTER = 'https://music.163.com/song/media/outer/url?id=';
         var noteIdx = 0;
         var timer = null;
         var songIdx = 0;
+        var failures = 0;
 
         try { songIdx = parseInt(sessionStorage.getItem('music-idx') || '0', 10) || 0; } catch (e) { }
         songIdx = ((songIdx % SONGS.length) + SONGS.length) % SONGS.length;
+        var savedTime = 0;
+        try { savedTime = parseFloat(sessionStorage.getItem('music-time') || '0') || 0; } catch (e) { }
+
+        function say(msg) { if (statusEl) { statusEl.textContent = msg; } }
+
+        function fmt(t) {
+            if (!isFinite(t) || t < 0) { return '0:00'; }
+            var m = Math.floor(t / 60);
+            var s = Math.floor(t % 60);
+            return m + ':' + (s < 10 ? '0' : '') + s;
+        }
 
         function spawnNote() {
             if (reduce) return;
@@ -151,22 +186,107 @@
         function persist() {
             try {
                 sessionStorage.setItem('music-idx', String(songIdx));
-                if (panel.hidden) { sessionStorage.removeItem('music-on'); }
-                else { sessionStorage.setItem('music-on', '1'); }
+                sessionStorage.setItem('music-time', String(audio.currentTime || 0));
+                if (!panel.hidden && !audio.paused) { sessionStorage.setItem('music-on', '1'); }
+                else { sessionStorage.removeItem('music-on'); }
             } catch (e) { }
         }
 
-        function loadSong() {
+        function paint() {
+            var d = audio.duration;
+            var ratio = (isFinite(d) && d > 0) ? (audio.currentTime / d) : 0;
+            if (fill) { fill.style.width = (ratio * 100).toFixed(1) + '%'; }
+            if (timeEl) { timeEl.textContent = fmt(audio.currentTime) + ((isFinite(d) && d > 0) ? ' / ' + fmt(d) : ''); }
+        }
+
+        function tryPlay() {
+            var p = audio.play();
+            if (p && p.catch) {
+                p.catch(function () {
+                    panel.classList.remove('is-playing');
+                    say('点一下 ▶ 开始播放');
+                });
+            }
+        }
+
+        function loadSong(autoplay, seekTo) {
             var song = SONGS[songIdx];
-            frame.src = 'https://music.163.com/outchain/player?type=2&id=' + song.id + '&auto=1&height=66';
-            if (statusEl) { statusEl.textContent = '正在播放 · ' + song.name; }
+            audio.src = OUTER + song.id + '.mp3';
+            audio.load();
+            say('正在播放 · ' + song.name);
+            if (fill) { fill.style.width = '0%'; }
+            if (timeEl) { timeEl.textContent = '0:00'; }
+            if (seekTo && seekTo > 1) {
+                var onMeta = function () {
+                    audio.removeEventListener('loadedmetadata', onMeta);
+                    try { audio.currentTime = Math.min(seekTo, Math.max(0, (audio.duration || seekTo) - 1)); } catch (e) { }
+                };
+                audio.addEventListener('loadedmetadata', onMeta);
+            }
+            if (autoplay) { tryPlay(); }
             persist();
         }
 
-        function openPanel() {
+        function step(delta) {
+            songIdx = (songIdx + delta + SONGS.length) % SONGS.length;
+            failures = 0;
+            loadSong(true);
+        }
+
+        /* ---------- 音频事件 ---------- */
+        audio.addEventListener('playing', function () {
+            failures = 0;
+            panel.classList.add('is-playing');
+            persist();
+        });
+
+        audio.addEventListener('pause', function () {
+            panel.classList.remove('is-playing');
+            persist();
+        });
+
+        audio.addEventListener('timeupdate', paint);
+        audio.addEventListener('loadedmetadata', paint);
+        audio.addEventListener('ended', function () { step(1); });
+
+        /* 这首播不了（下架 / 版权变化）→ 自动跳过，全都不行就停手 */
+        audio.addEventListener('error', function () {
+            failures++;
+            if (failures >= SONGS.length) {
+                panel.classList.remove('is-playing');
+                say('歌单暂时播不了，等会儿再试');
+                return;
+            }
+            say('这首播不了，已跳到下一首…');
+            window.setTimeout(function () { step(1); }, 500);
+        });
+
+        /* ---------- 控件 ---------- */
+        if (toggle) {
+            toggle.addEventListener('click', function () {
+                if (audio.paused) {
+                    if (!audio.getAttribute('src')) { loadSong(true, savedTime); } else { tryPlay(); }
+                } else {
+                    audio.pause();
+                }
+            });
+        }
+
+        if (bar) {
+            bar.addEventListener('click', function (e) {
+                var d = audio.duration;
+                if (!isFinite(d) || d <= 0) { return; }
+                var rect = bar.getBoundingClientRect();
+                var ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+                audio.currentTime = ratio * d;
+                paint();
+            });
+        }
+
+        function openPanel(autoStart) {
             panel.hidden = false;
             btn.setAttribute('aria-expanded', 'true');
-            if (!frame.src) { loadSong(); }
+            if (!audio.getAttribute('src')) { loadSong(autoStart !== false, savedTime); }
             spawnNote();
             if (!timer) { timer = window.setInterval(spawnNote, 620); }
             persist();
@@ -180,28 +300,20 @@
         }
 
         btn.addEventListener('click', function () {
-            if (panel.hidden) { openPanel(); } else { closePanel(); }
+            if (panel.hidden) { openPanel(true); } else { closePanel(); }
         });
 
         var prev = document.getElementById('music-prev');
         var next = document.getElementById('music-next');
-        if (prev) {
-            prev.addEventListener('click', function () {
-                songIdx = (songIdx - 1 + SONGS.length) % SONGS.length;
-                loadSong();
-            });
-        }
-        if (next) {
-            next.addEventListener('click', function () {
-                songIdx = (songIdx + 1) % SONGS.length;
-                loadSong();
-            });
-        }
+        if (prev) { prev.addEventListener('click', function () { step(-1); }); }
+        if (next) { next.addEventListener('click', function () { step(1); }); }
 
-        /* 从别的页面跳过来：上页在放歌就接着放同一首 */
+        /* 整页刷新/直接进入时：上页在放歌就接着放（位置也续上；被浏览器拦自动播放则提示点 ▶） */
         try {
-            if (sessionStorage.getItem('music-on')) { openPanel(); }
+            if (sessionStorage.getItem('music-on')) { openPanel(true); }
         } catch (e) { }
+
+        window.addEventListener('pagehide', persist);
     }());
     </script>
 </nav>

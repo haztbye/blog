@@ -1,5 +1,6 @@
 # 本文件由 tools/fetch-playlist.py 自动生成，请勿手改
 # 歌单：saveindarkness喜欢的音乐（2713947365）
+# 判定标准：fee != 1 且外链音频地址实测返回音频
 
 - id: "2724791369"
   name: "Montagem Nada"

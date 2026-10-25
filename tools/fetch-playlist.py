@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """抓取网易云公开歌单，生成 data/music.yaml（播放器用）
 
-- 只保留可免费播放的曲目（fee=1 的 VIP 歌曲在未登录状态下播不了，直接跳过）
+- 只保留**真的能匿名播放**的曲目：先跳过 fee=1 的 VIP，再实测外链音频地址
+  （VIP / 下架的歌会跳到 404 页面）
 - 抓取失败时保留旧文件并正常退出，绝不让部署挂掉
 - 歌单 ID 可用环境变量 NETEASE_PLAYLIST_ID 覆盖，默认见下方
 """
@@ -16,16 +17,28 @@ PLAYLIST_ID = os.environ.get("NETEASE_PLAYLIST_ID", "2713947365")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "music.yaml")
 API = "https://music.163.com/api/v6/playlist/detail?id=%s&n=1000"
+OUTER = "https://music.163.com/song/media/outer/url?id=%s.mp3"
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "Referer": "https://music.163.com/",
+}
+
+
+def playable(song_id):
+    """外链音频地址是否真的返回音频（而不是 404 页面）"""
+    req = urllib.request.Request(OUTER % song_id, headers=dict(HEADERS, Range="bytes=0-1024"))
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            ctype = (resp.headers.get("Content-Type") or "").lower()
+            resp.read(64)
+            return "audio" in ctype
+    except Exception:
+        return False
 
 
 def main():
-    req = urllib.request.Request(
-        API % PLAYLIST_ID,
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-            "Referer": "https://music.163.com/",
-        },
-    )
+    req = urllib.request.Request(API % PLAYLIST_ID, headers=HEADERS)
     try:
         with urllib.request.urlopen(req, timeout=25) as resp:
             data = json.load(resp)
@@ -41,24 +54,34 @@ def main():
 
     songs = []
     skipped_vip = 0
+    skipped_dead = 0
     for track in tracks:
         if track.get("fee") == 1:  # VIP 专属：匿名播放器播不了
             skipped_vip += 1
             continue
+        song_id = str(track.get("id", ""))
+        if not song_id:
+            continue
+        # 实测外链音频：确认真的能播（VIP / 下架 / 版权受限的会跳到 404 页面）
+        if not playable(song_id):
+            skipped_dead += 1
+            print("[music] 跳过（外链不可播）：%s" % track.get("name", song_id))
+            continue
         artists = " / ".join(a.get("name", "") for a in (track.get("ar") or []) if a.get("name"))
         songs.append({
-            "id": str(track.get("id", "")),
+            "id": song_id,
             "name": track.get("name", ""),
             "artist": artists,
         })
 
     if not songs:
-        print("[music] 歌单里没有可免费播放的歌，保留现有文件")
+        print("[music] 歌单里没有真正可播的歌，保留现有文件")
         return 0
 
     lines = [
         "# 本文件由 tools/fetch-playlist.py 自动生成，请勿手改",
         "# 歌单：%s（%s）" % (playlist.get("name", "?"), PLAYLIST_ID),
+        "# 判定标准：fee != 1 且外链音频地址实测返回音频",
         "",
     ]
     for song in songs:
@@ -69,7 +92,8 @@ def main():
     with open(OUT, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(lines) + "\n")
 
-    print("[music] 写入 %d 首可播放曲目（跳过 VIP %d 首）-> %s" % (len(songs), skipped_vip, OUT))
+    print("[music] 写入 %d 首可播放曲目（跳过 VIP %d 首、外链失效 %d 首）-> %s"
+          % (len(songs), skipped_vip, skipped_dead, OUT))
     return 0
 
 
