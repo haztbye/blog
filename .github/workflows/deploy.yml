@@ -1,18 +1,22 @@
 name: Deploy to server
 
-# 每次 push 到 master（或手动触发）时，在 GitHub 上构建并同步到自己的服务器。
+# 每次 push 到 master（或手动触发 / 定时）时，在 GitHub 上构建并同步到自己的服务器。
 # 需要的仓库 Secrets（Settings → Secrets and variables → Actions）：
 #   SERVER_HOST      服务器地址（IP 或域名）
 #   SERVER_USER      登录用户（如 root）
 #   SERVER_SSH_KEY   专用部署私钥（hugo_deploy_ed25519 的完整内容）
 #   SERVER_PORT      SSH 端口（可选，默认 22）
+#
+# 歌单是「构建时」抓取的，所以往歌单加歌后要等一次构建才会出现在播放器里：
+#   · 自动：下面这条定时任务（每 2 小时）
+#   · 立刻：push 一次（比如双击 publish.bat），或到 Actions 页面点「Run workflow」
 
 on:
   push:
     branches: [master]
   schedule:
-    # 每天 04:30（北京时间）刷新一次歌单，换了歌不用手动部署
-    - cron: "30 20 * * *"
+    # 每 2 小时刷新一次歌单（顺带重新部署），不想等就手动触发
+    - cron: "15 */2 * * *"
   workflow_dispatch:
 
 concurrency:
