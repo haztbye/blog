@@ -1,0 +1,35 @@
+{{- /* 加密日志：页面上只显示马赛克 + 密码框，正文在浏览器里解密后渲染。
+       密文放在 static/study-log.json（由 tools/study-log/encrypt_log.py 生成），
+       JS 用 fetch 读取 —— 这样完全避开 Go 模板在 <script> 里的上下文转义。
+       这里的数据只用来显示「N 篇 · 最近更新 X」这类元信息。 */ -}}
+{{- $d := index .Site.Data "study-log" -}}
+{{- if not $d -}}
+    <p class="study-log-missing">日志密文还没生成：先运行 <code>tools\study-log\publish-log.bat</code>。</p>
+{{- else -}}
+<div class="study-log" id="study-log" data-updated="{{ $d.updated }}">
+    <div class="study-log-teaser" id="study-log-teaser">
+        <div class="study-log-mosaic" aria-hidden="true"></div>
+        <div class="study-log-lock">
+            <p class="study-log-title">{{ partial "helper/icon" "lock" }}加密日志</p>
+            <p class="study-log-meta">{{ $d.entries }} 篇 · 最近更新 {{ $d.updated }} · {{ $d.chars }} 字</p>
+            <form class="study-log-form" id="study-log-form">
+                <input class="study-log-input" id="study-log-pass" type="password" placeholder="输入密码解锁"
+                    autocomplete="current-password" aria-label="日志密码">
+                <button class="study-log-btn" type="submit">解锁</button>
+            </form>
+            <p class="study-log-error" id="study-log-error" hidden>密码不对，再试一次</p>
+            <p class="study-log-hint">内容在浏览器本地解密，服务器和仓库里只有密文。</p>
+        </div>
+    </div>
+
+    <div class="study-log-unlocked" id="study-log-unlocked" hidden>
+        <div class="study-log-bar">
+            <span class="study-log-bar-text">已解锁 · 仅本标签页可见</span>
+            <button class="study-log-lock-btn" type="button" id="study-log-lock-btn">锁定</button>
+        </div>
+        <div class="study-log-content article-content" id="study-log-content"></div>
+    </div>
+</div>
+<script src="{{ "js/vendor/marked.min.js" | relURL }}" defer></script>
+<script src="{{ "js/study-log.js" | relURL }}" defer></script>
+{{- end -}}

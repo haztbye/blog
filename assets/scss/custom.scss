@@ -3417,3 +3417,219 @@ body.template-flower .main-container {
     }
 }
 
+/* ==========================================================================
+   21. 加密备考日志（马赛克 + 密码解锁；正文只在浏览器里解密）
+   ========================================================================== */
+
+.study-log {
+    margin: 28px 0;
+}
+
+.study-log-missing {
+    padding: 18px 20px;
+    border-radius: 16px;
+    background-color: var(--tw-glass-bg);
+    border: 1px dashed var(--tw-glass-border);
+    color: var(--card-text-color-tertiary);
+}
+
+.study-log-teaser {
+    position: relative;
+    overflow: hidden;
+    min-height: 330px;
+    border-radius: 22px;
+    border: 1px solid var(--tw-glass-border);
+    background-color: var(--tw-glass-bg);
+    box-shadow: var(--tw-shadow-card);
+}
+
+/* 马赛克底：一张"被打成格子"的图再糊一层，看起来就是内容被挡住了 */
+.study-log-mosaic {
+    position: absolute;
+    inset: -12px;
+    background-image: url("/img/study-log-mosaic.webp");
+    background-size: cover;
+    background-position: center;
+    filter: blur(2.5px) saturate(0.85);
+    opacity: 0.5;
+}
+
+.study-log-lock {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 330px;
+    padding: 40px 24px;
+    text-align: center;
+    background: radial-gradient(120% 90% at 50% 0%, rgba(24, 16, 48, 0.35), rgba(12, 8, 28, 0.72));
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+}
+
+.study-log-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-family: var(--tw-font-display);
+    font-size: 1.9rem;
+    letter-spacing: 0.14em;
+    color: #fff;
+}
+
+.study-log-title svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--season-accent);
+}
+
+.study-log-meta {
+    margin: 0;
+    font-size: 1.22rem;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.study-log-form {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    /* 注意：不要用 min()/clamp()，Dart Sass 会当成数学函数报单位错误 */
+    max-width: 380px;
+    margin-top: 6px;
+}
+
+.study-log-input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 1.34rem;
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1.6px solid rgba(255, 255, 255, 0.34);
+    border-radius: 12px;
+    outline: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.study-log-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.study-log-input:focus {
+    border-color: var(--season-accent);
+    background-color: rgba(255, 255, 255, 0.16);
+}
+
+.study-log-btn {
+    flex: 0 0 auto;
+    padding: 10px 20px;
+    font-family: inherit;
+    font-size: 1.34rem;
+    font-weight: 600;
+    color: #1a1030;
+    background-color: var(--season-accent);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.study-log-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+}
+
+.study-log-error {
+    margin: 0;
+    font-size: 1.24rem;
+    color: #ff9db1;
+}
+
+.study-log-hint {
+    margin: 2px 0 0;
+    font-size: 1.14rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* 解锁后的正文 */
+.study-log-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    color: var(--card-text-color-tertiary);
+    background-color: var(--tw-glass-bg);
+    border: 1px solid var(--tw-glass-border);
+}
+
+.study-log-lock-btn {
+    padding: 4px 12px;
+    font-family: inherit;
+    font-size: 1.16rem;
+    color: var(--card-text-color-secondary);
+    background-color: transparent;
+    border: 1px solid var(--tw-glass-border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.study-log-lock-btn:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+/* 解密出来的日志：像日记一样分节 */
+.study-log-content h2 {
+    margin-top: 2em;
+    padding-top: 0.9em;
+    font-size: 1.9rem;
+    letter-spacing: 0.06em;
+    color: var(--card-text-color-main);
+    border-top: 1px dashed var(--tw-glass-border);
+}
+
+.study-log-content h2:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+.study-log-content blockquote {
+    margin: 1.4em 0;
+    padding: 2px 0 2px 16px;
+    border-left: 3px solid var(--season-accent);
+    color: var(--card-text-color-secondary);
+}
+
+@media (max-width: 760px) {
+
+    .study-log-teaser,
+    .study-log-lock {
+        min-height: 280px;
+    }
+
+    .study-log-lock {
+        padding: 30px 18px;
+    }
+
+    .study-log-form {
+        flex-direction: column;
+    }
+
+    .study-log-btn {
+        width: 100%;
+    }
+}
+
