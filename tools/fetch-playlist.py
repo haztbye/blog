@@ -12,6 +12,7 @@
 import json
 import os
 import sys
+import time
 import urllib.request
 
 PLAYLIST_ID = os.environ.get("NETEASE_PLAYLIST_ID", "18521514782")
@@ -28,17 +29,22 @@ HEADERS = {
 }
 
 
-def fetch_lyrics(song_id):
-    """取 LRC 歌词（带时间轴）；纯音乐 / 无歌词返回空串"""
-    req = urllib.request.Request(LYRIC_API % song_id, headers=HEADERS)
-    try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            data = json.load(resp)
-    except Exception:
-        return ""
-    text = (data.get("lrc") or {}).get("lyric") or ""
-    # 至少要有一行带时间轴，否则视为没有歌词
-    return text if ("[0" in text or "[1" in text) else ""
+def fetch_lyrics(song_id, retries=1):
+    """取 LRC 歌词（带时间轴）；纯音乐 / 无歌词 / 抓取失败返回空串"""
+    for attempt in range(retries + 1):
+        req = urllib.request.Request(LYRIC_API % song_id, headers=HEADERS)
+        try:
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = json.load(resp)
+            text = (data.get("lrc") or {}).get("lyric") or ""
+            # 至少要有一行带时间轴，否则视为没有歌词
+            if "[0" in text or "[1" in text:
+                return text
+            return ""
+        except Exception:
+            if attempt < retries:
+                time.sleep(0.6)
+    return ""
 
 
 def playable(song_id):
@@ -109,17 +115,39 @@ def main():
         fh.write("\n".join(lines) + "\n")
 
     # 歌词：单独放一个 JSON，页面播放时按需 fetch（不塞进 HTML，省首屏体积）
+    # 与上一次的结果**合并**：某首抓失败就沿用旧歌词，绝不用残缺结果覆盖完整的
+    previous = {}
+    if os.path.exists(LYRICS_OUT):
+        try:
+            with open(LYRICS_OUT, encoding="utf-8") as fh:
+                previous = json.load(fh) or {}
+        except Exception:
+            previous = {}
+
     lyrics = {}
+    reused = 0
     for song in songs:
         text = fetch_lyrics(song["id"])
+        if not text:
+            text = previous.get(song["id"], "")
+            if text:
+                reused += 1
         if text:
             lyrics[song["id"]] = text
-    with open(LYRICS_OUT, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(json.dumps(lyrics, ensure_ascii=False, separators=(",", ":")) + "\n")
+        time.sleep(0.3)   # 稍微错开，降低被限流的概率
+
+    if len(lyrics) < len(previous):
+        # 兜底：新结果比旧的还少，说明这次抓取不稳，保留旧文件
+        print("[music] 本次只抓到 %d 首歌词（旧文件有 %d 首），保留旧歌词文件"
+              % (len(lyrics), len(previous)))
+    else:
+        with open(LYRICS_OUT, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(json.dumps(lyrics, ensure_ascii=False, separators=(",", ":")) + "\n")
 
     print("[music] 写入 %d 首可播放曲目（跳过 VIP %d 首、外链失效 %d 首）-> %s"
           % (len(songs), skipped_vip, skipped_dead, OUT))
-    print("[music] 歌词 %d/%d 首 -> %s" % (len(lyrics), len(songs), LYRICS_OUT))
+    print("[music] 歌词 %d/%d 首（沿用旧歌词 %d 首）-> %s"
+          % (len(lyrics), len(songs), reused, LYRICS_OUT))
     return 0
 
 
