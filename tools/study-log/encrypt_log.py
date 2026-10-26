@@ -30,7 +30,10 @@ ROOT = Path(__file__).resolve().parents[2]           # my-blog/
 OUT = ROOT / "data" / "study-log.yaml"
 JSON_OUT = ROOT / "static" / "study-log.json"
 DEFAULT_SRC = ROOT.parent / "study-log-private" / "kaoyan-log.md"
-KEY_FILE = Path(os.environ.get("USERPROFILE") or Path.home()) / ".huanhe-study-key"
+HOME = Path(os.environ.get("USERPROFILE") or Path.home())
+KEY_FILE = HOME / ".huanhe-study-key"
+SALT_FILE = HOME / ".huanhe-study-salt"      # 固定 salt：保证多次加密派生出的密钥一致
+                                             # （否则图片等附属密文会在下次重加密后解不开）
 
 
 def load_key():
@@ -45,6 +48,18 @@ def load_key():
         "[study-log] 没找到密码。请先运行 tools\\study-log\\set-key.bat 设置密码，"
         "或临时用 STUDY_LOG_KEY 环境变量。"
     )
+
+
+def load_salt():
+    """固定的 KDF salt（本机保存，不进仓库）：保证每次加密派生出的密钥相同"""
+    if SALT_FILE.exists():
+        raw = base64.b64decode(SALT_FILE.read_text(encoding="utf-8").strip())
+        if len(raw) == 16:
+            return raw
+    raw = os.urandom(16)
+    SALT_FILE.write_text(base64.b64encode(raw).decode("ascii") + "\n",
+                         encoding="utf-8", newline="\n")
+    return raw
 
 
 def main():
@@ -69,7 +84,7 @@ def main():
     except ImportError:
         sys.exit("[study-log] 当前 Python 没有 cryptography 库，换个解释器再试")
 
-    salt = os.urandom(16)
+    salt = load_salt()
     iv = os.urandom(12)
     derived = PBKDF2HMAC(
         algorithm=hashes.SHA256(), length=32, salt=salt, iterations=ITERATIONS
@@ -99,6 +114,15 @@ def main():
     # 密文另存一份静态 JSON：页面用 fetch 读取，避开 Hugo 模板在 <script> 里的上下文转义
     import json as _json
 
+    # 把加密图片的索引并进来（图片密文放在 static/study-log-media/*.bin）
+    media = {}
+    media_index = ROOT / "static" / "study-log-media" / "index.json"
+    if media_index.exists():
+        try:
+            media = _json.loads(media_index.read_text(encoding="utf-8")) or {}
+        except Exception:
+            media = {}
+
     JSON_OUT.write_text(
         _json.dumps(
             {
@@ -112,6 +136,7 @@ def main():
                 "entries": entries,
                 "updated": today,
                 "chars": len(text),
+                "media": media,
             },
             ensure_ascii=False,
             separators=(",", ":"),
@@ -122,7 +147,7 @@ def main():
     )
 
     print("[study-log] 已加密 %d 字符 / %d 篇 → %s" % (len(text), entries, OUT))
-    print("[study-log] 密文 JSON → %s" % JSON_OUT)
+    print("[study-log] 密文 JSON → %s（附带 %d 张加密图片）" % (JSON_OUT, len(media)))
     print("[study-log] 密码没有写入任何文件，仓库里只有密文")
     return 0
 

@@ -3673,6 +3673,23 @@ body.template-flower .main-container {
 }
 
 /* 解密出来的日志：像日记一样分节 */
+.study-log-content img,
+.study-log-img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto;
+    border-radius: 14px;
+    border: 1px solid var(--tw-glass-border);
+    box-shadow: var(--tw-shadow-card);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+.study-log-content img.is-ready {
+    opacity: 1;
+}
+
 .study-log-content h2 {
     margin-top: 2em;
     padding-top: 0.9em;

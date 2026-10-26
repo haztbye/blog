@@ -18,8 +18,10 @@
     root.dataset.js = 'bound';
 
     var AAD = 'huanhe-study-log';
+    var MEDIA_AAD = 'huanhe-study-log-media';
     var SESSION_KEY = 'study-log-key';
     var meta = null;
+    var derivedKey = null;
 
     function showError(msg) {
         if (!errEl) { return; }
@@ -71,6 +73,7 @@
                 );
             })
             .then(function (key) {
+                derivedKey = key;
                 return window.crypto.subtle.decrypt(
                     { name: 'AES-GCM', iv: b64ToBytes(meta.iv), additionalData: enc.encode(AAD) },
                     key,
@@ -80,12 +83,61 @@
             .then(function (buf) { return new TextDecoder().decode(buf); });
     }
 
+    /* 加密图片：正文里写 ![](media:名字)，这里取密文 → 用同一把密钥解密 → 换成 blob URL */
+    function resolveMedia(scope, key) {
+        var imgs = scope.querySelectorAll('img[src^="media:"]');
+        var outcome = [];
+        if (root) { root.setAttribute('data-media', 'found=' + imgs.length); }
+        Array.prototype.forEach.call(imgs, function (img) {
+            var name = img.getAttribute('src').slice(6);
+            var info = meta && meta.media ? meta.media[name] : null;
+            if (!info) {
+                outcome.push(name + ':no-meta');
+                img.replaceWith(document.createTextNode('［图片缺失：' + name + '］'));
+                if (root) { root.setAttribute('data-media', outcome.join(',')); }
+                return;
+            }
+            img.removeAttribute('src');
+            img.classList.add('study-log-img');
+            img.alt = img.alt || '';
+            fetch('/study-log-media/' + info.file, { credentials: 'same-origin' })
+                .then(function (r) {
+                    if (!r.ok) { throw new Error('HTTP ' + r.status); }
+                    return r.arrayBuffer();
+                })
+                .then(function (buf) {
+                    return window.crypto.subtle.decrypt(
+                        {
+                            name: 'AES-GCM',
+                            iv: b64ToBytes(info.iv),
+                            additionalData: new TextEncoder().encode(MEDIA_AAD)
+                        },
+                        key,
+                        buf
+                    );
+                })
+                .then(function (plain) {
+                    var blob = new Blob([plain], { type: info.type || 'image/webp' });
+                    img.src = URL.createObjectURL(blob);
+                    img.classList.add('is-ready');
+                    outcome.push(name + ':ok(' + plain.byteLength + ')');
+                    if (root) { root.setAttribute('data-media', outcome.join(',')); }
+                })
+                .catch(function (err) {
+                    outcome.push(name + ':fail(' + (err && err.name) + ')');
+                    if (root) { root.setAttribute('data-media', outcome.join(',')); }
+                    img.replaceWith(document.createTextNode('［图片解密失败］'));
+                });
+        });
+    }
+
     function render(md) {
         return ensureMarked().then(function (ok) {
             content.innerHTML = ok ? window.marked.parse(md) : '<p>' + plainFallback(md) + '</p>';
             teaser.hidden = true;
             unlocked.hidden = false;
             if (errEl) { errEl.hidden = true; }
+            if (derivedKey) { resolveMedia(content, derivedKey); }
         });
     }
 
@@ -98,11 +150,18 @@
         });
     }
 
+    var pendingPass = null;
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
-        if (!meta) { showError('密文还没加载好，稍后再试'); return; }
         var pass = input.value;
         if (!pass) { showError('先输入密码'); return; }
+        if (!meta) {
+            /* 密文还没 fetch 完就点了提交：先记下密码，等加载完自动继续 */
+            pendingPass = pass;
+            showError('正在读取密文…');
+            return;
+        }
         unlock(pass).catch(function (err) {
             showError(err && err.message === 'no-subtle'
                 ? '当前环境不支持本地解密（请用 HTTPS 打开本站）'
@@ -134,6 +193,12 @@
             meta = data;
             if (!meta || !meta.ct) { root.dataset.js = 'meta-empty'; throw new Error('empty'); }
             root.dataset.js = 'meta-ok';
+            if (pendingPass) {
+                var p = pendingPass;
+                pendingPass = null;
+                unlock(p).catch(function () { showError('密码不对，再试一次'); });
+                return;
+            }
             var saved = null;
             try { saved = sessionStorage.getItem(SESSION_KEY); } catch (e) { }
             if (saved) {
