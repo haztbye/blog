@@ -7,16 +7,13 @@ name: Deploy to server
 #   SERVER_SSH_KEY   专用部署私钥（hugo_deploy_ed25519 的完整内容）
 #   SERVER_PORT      SSH 端口（可选，默认 22）
 #
-# 歌单是「构建时」抓取的，所以往歌单加歌后要等一次构建才会出现在播放器里：
-#   · 自动：下面这条定时任务（每 2 小时）
-#   · 立刻：push 一次（比如双击 publish.bat），或到 Actions 页面点「Run workflow」
+# 歌单/歌词**不在这里抓**：GitHub Runner 访问网易云会被限流，脚本会误判
+# 「这首歌不可播」而把歌删掉（2026-10-26 真实踩过：6 首被削成 2 首）。
+# 歌单是固定的，要更新时本地跑 tools/fetch-playlist.py 再 push。
 
 on:
   push:
     branches: [master]
-  schedule:
-    # 每 2 小时刷新一次歌单（顺带重新部署），不想等就手动触发
-    - cron: "15 */2 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -59,9 +56,6 @@ jobs:
         with:
           hugo-version: "0.149.0"
           extended: true
-
-      - name: Refresh music playlist
-        run: python3 tools/fetch-playlist.py || true
 
       - name: Build
         run: hugo --minify --gc

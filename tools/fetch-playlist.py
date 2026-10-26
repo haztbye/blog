@@ -11,8 +11,10 @@
 
 import json
 import os
+import re
 import sys
 import time
+import urllib.error
 import urllib.request
 
 PLAYLIST_ID = os.environ.get("NETEASE_PLAYLIST_ID", "18521514782")
@@ -47,16 +49,26 @@ def fetch_lyrics(song_id, retries=1):
     return ""
 
 
-def playable(song_id):
-    """外链音频地址是否真的返回音频（而不是 404 页面）"""
-    req = urllib.request.Request(OUTER % song_id, headers=dict(HEADERS, Range="bytes=0-1024"))
-    try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            ctype = (resp.headers.get("Content-Type") or "").lower()
-            resp.read(64)
-            return "audio" in ctype
-    except Exception:
-        return False
+def playable(song_id, retries=2):
+    """外链音频是否可播：True=确认可播，False=确认不可播，None=没问出来（网络/限流）
+
+    注意：**只有拿到响应且确认不是音频时才返回 False**。请求异常一律返回 None，
+    否则在 GitHub Runner 这种容易被限流的环境里会把好歌误删（真实踩过的坑）。
+    """
+    for attempt in range(retries + 1):
+        req = urllib.request.Request(OUTER % song_id, headers=dict(HEADERS, Range="bytes=0-1024"))
+        try:
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                ctype = (resp.headers.get("Content-Type") or "").lower()
+                resp.read(64)
+                return "audio" in ctype
+        except urllib.error.HTTPError:
+            # 有响应（例如 404 页面）→ 确认不可播
+            return False
+        except Exception:
+            if attempt < retries:
+                time.sleep(0.8)
+    return None
 
 
 def main():
@@ -77,6 +89,7 @@ def main():
     songs = []
     skipped_vip = 0
     skipped_dead = 0
+    unknown = 0
     for track in tracks:
         if track.get("fee") == 1:  # VIP 专属：匿名播放器播不了
             skipped_vip += 1
@@ -84,11 +97,15 @@ def main():
         song_id = str(track.get("id", ""))
         if not song_id:
             continue
-        # 实测外链音频：确认真的能播（VIP / 下架 / 版权受限的会跳到 404 页面）
-        if not playable(song_id):
+        # 实测外链音频：确认不可播才跳过；问不出来（限流/超时）先保留
+        status = playable(song_id)
+        if status is False:
             skipped_dead += 1
-            print("[music] 跳过（外链不可播）：%s" % track.get("name", song_id))
+            print("[music] 跳过（外链确认不可播）：%s" % track.get("name", song_id))
             continue
+        if status is None:
+            unknown += 1
+            print("[music] 无法确认（网络问题），先保留：%s" % track.get("name", song_id))
         artists = " / ".join(a.get("name", "") for a in (track.get("ar") or []) if a.get("name"))
         songs.append({
             "id": song_id,
@@ -100,19 +117,34 @@ def main():
         print("[music] 歌单里没有真正可播的歌，保留现有文件")
         return 0
 
-    lines = [
-        "# 本文件由 tools/fetch-playlist.py 自动生成，请勿手改",
-        "# 歌单：%s（%s）" % (playlist.get("name", "?"), PLAYLIST_ID),
-        "# 判定标准：fee != 1 且外链音频地址实测返回音频",
-        "",
-    ]
-    for song in songs:
-        lines.append('- id: "%s"' % song["id"])
-        lines.append("  name: %s" % json.dumps(song["name"], ensure_ascii=False))
-        lines.append("  artist: %s" % json.dumps(song["artist"], ensure_ascii=False))
+    # 安全阀：本次确认的曲目比上次少 → 保留旧文件，避免"限流导致歌曲凭空消失"
+    previous_ids = []
+    if os.path.exists(OUT):
+        try:
+            with open(OUT, encoding="utf-8") as fh:
+                previous_ids = re.findall(r'^\s*-\s*id:\s*"?(\d+)"?', fh.read(), re.MULTILINE)
+        except Exception:
+            previous_ids = []
 
-    with open(OUT, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write("\n".join(lines) + "\n")
+    write_playlist = True
+    if previous_ids and len(songs) < len(previous_ids):
+        write_playlist = False
+        print("[music] 本次只确认 %d 首（上次 %d 首），保留旧歌单文件以免误删" % (len(songs), len(previous_ids)))
+
+    if write_playlist:
+        lines = [
+            "# 本文件由 tools/fetch-playlist.py 自动生成，请勿手改",
+            "# 歌单：%s（%s）" % (playlist.get("name", "?"), PLAYLIST_ID),
+            "# 判定标准：fee != 1 且外链音频实测返回音频（确认不可播才剔除）",
+            "",
+        ]
+        for song in songs:
+            lines.append('- id: "%s"' % song["id"])
+            lines.append("  name: %s" % json.dumps(song["name"], ensure_ascii=False))
+            lines.append("  artist: %s" % json.dumps(song["artist"], ensure_ascii=False))
+
+        with open(OUT, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write("\n".join(lines) + "\n")
 
     # 歌词：单独放一个 JSON，页面播放时按需 fetch（不塞进 HTML，省首屏体积）
     # 与上一次的结果**合并**：某首抓失败就沿用旧歌词，绝不用残缺结果覆盖完整的
@@ -144,8 +176,9 @@ def main():
         with open(LYRICS_OUT, "w", encoding="utf-8", newline="\n") as fh:
             fh.write(json.dumps(lyrics, ensure_ascii=False, separators=(",", ":")) + "\n")
 
-    print("[music] 写入 %d 首可播放曲目（跳过 VIP %d 首、外链失效 %d 首）-> %s"
-          % (len(songs), skipped_vip, skipped_dead, OUT))
+    print("[music] 曲目 %d 首（跳过 VIP %d、确认失效 %d、无法确认保留 %d）-> %s%s"
+          % (len(songs), skipped_vip, skipped_dead, unknown, OUT,
+             "" if write_playlist else "（本次未覆盖）"))
     print("[music] 歌词 %d/%d 首（沿用旧歌词 %d 首）-> %s"
           % (len(lyrics), len(songs), reused, LYRICS_OUT))
     return 0
