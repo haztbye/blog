@@ -9,9 +9,17 @@ REM Usage: publish.bat            (default commit message)
 REM        publish.bat "message"  (custom commit message)
 REM No local changes? It still makes an empty commit, so the site rebuilds
 REM (useful after adding songs to the NetEase playlist).
+REM It also re-encrypts the private study log first, so editing the plaintext
+REM outside the repo is enough - no need to remember publish-log.bat.
 
 set "MSG=%~1"
 if "%MSG%"=="" set "MSG=update: publish from local"
+
+if exist "..\study-log-private\kaoyan-log.md" (
+    echo [0/3] refresh encrypted study log
+    call tools\study-log\refresh.bat
+    if errorlevel 1 echo   (skipped - study log was NOT refreshed, publishing anyway)
+)
 
 echo [1/3] git add
 git add -A

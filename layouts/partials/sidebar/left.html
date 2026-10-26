@@ -1,7 +1,18 @@
 {{- /*
   顶部胶囊导航（覆盖主题原来的左侧栏）
   保留了主题 JS 需要的 #toggle-menu / #main-menu / #dark-mode-toggle 三个节点
+
+  注意：歌词栏必须放在 <nav> **外面且在前面**——它在导航的 transform 容器里会
+  变成相对定位，而且播放器脚本（内联在 nav 里）执行时需要能拿到这个节点。
 */ -}}
+<aside class="lyrics-rail" id="lyrics-rail" hidden aria-label="歌词">
+    <div class="lyrics-rail-head">
+        <span class="lyrics-rail-song" id="lyrics-rail-song">—</span>
+        <button class="lyrics-rail-close" id="lyrics-rail-close" type="button" aria-label="隐藏歌词" title="隐藏歌词">✕</button>
+    </div>
+    <div class="lyrics-rail-body" id="lyrics-rail-body"></div>
+</aside>
+
 <nav class="topnav" id="topnav" aria-label="主导航">
     <div class="topnav-inner">
         <a class="topnav-brand" href="{{ "/" | relLangURL }}">
@@ -69,9 +80,8 @@
                                 </g>
                             </svg>
                         </button>
-                        <div class="music-progress" id="music-progress" aria-label="播放进度" role="slider" tabindex="0">
-                            <i id="music-progress-fill"></i>
-                        </div>
+                        <canvas class="music-wave" id="music-wave" role="slider" tabindex="0"
+                            aria-label="播放进度（点击可跳转）" title="点这里跳转进度"></canvas>
                         <span class="music-time" id="music-time">0:00</span>
                     </div>
                     <audio id="music-audio" preload="none"></audio>
@@ -129,9 +139,13 @@
         var audio = document.getElementById('music-audio');
         var statusEl = document.getElementById('music-status');
         var toggle = document.getElementById('music-toggle');
-        var bar = document.getElementById('music-progress');
-        var fill = document.getElementById('music-progress-fill');
+        var wave = document.getElementById('music-wave');
+        var waveCtx = (wave && wave.getContext) ? wave.getContext('2d') : null;
         var timeEl = document.getElementById('music-time');
+        var rail = document.getElementById('lyrics-rail');
+        var railSongEl = document.getElementById('lyrics-rail-song');
+        var railBody = document.getElementById('lyrics-rail-body');
+        var railClose = document.getElementById('lyrics-rail-close');
         if (!btn || !panel || !audio) return;
 
         /* 曲目来自 data/music.yaml —— 构建时由 tools/fetch-playlist.py 抓取歌单自动生成，
@@ -140,7 +154,7 @@
         var SONGS = [
             {{- $songs := .Site.Data.music -}}
             {{- range $i, $song := $songs }}{{ if $i }},{{ end }}
-            { id: {{ $song.id }}, name: {{ $song.name }} }{{ end }}
+            { id: {{ $song.id }}, name: {{ $song.name }}, artist: {{ $song.artist }} }{{ end }}
         ];
 
         /* 歌单里没有可播的歌（全 VIP / 抓取失败）→ 隐藏播放器按钮 */
@@ -194,9 +208,204 @@
 
         function paint() {
             var d = audio.duration;
-            var ratio = (isFinite(d) && d > 0) ? (audio.currentTime / d) : 0;
-            if (fill) { fill.style.width = (ratio * 100).toFixed(1) + '%'; }
             if (timeEl) { timeEl.textContent = fmt(audio.currentTime) + ((isFinite(d) && d > 0) ? ' / ' + fmt(d) : ''); }
+            drawWave();
+        }
+
+        /* ---------- 正弦波播放条（已播放部分亮色，其余暗色；点哪跳哪） ---------- */
+        var wavePhase = 0;
+        var waveRaf = 0;
+        var lastTimeText = '';
+
+        function sizeWave() {
+            if (!wave || !waveCtx) { return; }
+            var dpr = window.devicePixelRatio || 1;
+            var w = wave.clientWidth || 260;
+            var h = wave.clientHeight || 44;
+            wave.width = Math.round(w * dpr);
+            wave.height = Math.round(h * dpr);
+            waveCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        function drawWave() {
+            if (!waveCtx || !wave) { return; }
+            if (!wave.width || wave.width < 4) { sizeWave(); }
+            var w = wave.clientWidth || 0;
+            var h = wave.clientHeight || 0;
+            if (!w || !h) { return; }
+
+            var cs = window.getComputedStyle(document.documentElement);
+            var accent = (cs.getPropertyValue('--season-accent') || '#d9558f').trim() || '#d9558f';
+            var playing = !audio.paused;
+            var d = audio.duration;
+            var progress = (isFinite(d) && d > 0) ? Math.min(1, audio.currentTime / d) : 0;
+
+            wavePhase += playing ? 0.07 : 0.012;
+            waveCtx.clearRect(0, 0, w, h);
+
+            var amp = playing ? 9.5 : 3.2;
+
+            function trace() {
+                waveCtx.beginPath();
+                for (var x = 0; x <= w; x += 1) {
+                    var p = x / w;
+                    var env = Math.sin(p * Math.PI);                       /* 两端收敛，像一段波 */
+                    var a = amp * (0.72 + 0.28 * Math.sin(wavePhase * 0.6 + p * 4));
+                    var y = h / 2 + Math.sin(p * 9 + wavePhase) * a * env;
+                    if (x === 0) { waveCtx.moveTo(x, y); } else { waveCtx.lineTo(x, y); }
+                }
+            }
+
+            /* 未播放：暗 */
+            waveCtx.save();
+            waveCtx.beginPath();
+            waveCtx.rect(progress * w, 0, w - progress * w, h);
+            waveCtx.clip();
+            trace();
+            waveCtx.lineWidth = 1.6;
+            waveCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            waveCtx.stroke();
+            waveCtx.restore();
+
+            /* 已播放：亮 */
+            waveCtx.save();
+            waveCtx.beginPath();
+            waveCtx.rect(0, 0, progress * w, h);
+            waveCtx.clip();
+            trace();
+            waveCtx.lineWidth = 2.4;
+            waveCtx.strokeStyle = accent;
+            waveCtx.stroke();
+            waveCtx.restore();
+
+            /* 播放头 */
+            if (progress > 0) {
+                waveCtx.fillStyle = accent;
+                waveCtx.fillRect(progress * w - 1, 7, 2, h - 14);
+            }
+        }
+
+        function waveLoop() {
+            drawWave();
+            syncLyrics();   /* 波形循环里也同步一次歌词：timeupdate 在部分环境会节流 */
+            if (!panel.hidden || !audio.paused) {
+                waveRaf = window.requestAnimationFrame(waveLoop);
+            } else {
+                waveRaf = 0;
+            }
+        }
+
+        function startWave() {
+            if (!waveRaf) { waveRaf = window.requestAnimationFrame(waveLoop); }
+        }
+
+        /* ---------- 右侧歌词栏 ---------- */
+        var lyricsMap = null;
+        var currentLines = [];
+        var lastLineIdx = -1;
+        var railDismissed = false;
+
+        var META_RE = /^(作词|作曲|编曲|混音|母带|制作人|录音|和声|监制|出品|OP|SP|吉他|贝斯|鼓|弦乐|词|曲|词曲)\s*[:：]/;
+
+        function loadLyrics(cb) {
+            if (lyricsMap) { cb(); return; }
+            fetch('/music-lyrics.json', { credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.json() : {}; })
+                .then(function (d) { lyricsMap = d || {}; cb(); })
+                .catch(function () { lyricsMap = {}; cb(); });
+        }
+
+        function parseLrc(text) {
+            var out = [];
+            var re = /\[(\d{1,2}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g;
+            String(text).split(/\r?\n/).forEach(function (line) {
+                var m;
+                var times = [];
+                re.lastIndex = 0;
+                while ((m = re.exec(line)) !== null) {
+                    times.push(parseInt(m[1], 10) * 60 + parseInt(m[2], 10) + (m[3] ? parseInt(m[3], 10) / 1000 : 0));
+                }
+                var content = line.replace(re, '').trim();
+                if (!content || META_RE.test(content)) { return; }
+                times.forEach(function (t) { out.push({ t: t, text: content }); });
+            });
+            out.sort(function (a, b) { return a.t - b.t; });
+            return out;
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function renderRail(idx) {
+            if (!railBody) { return; }
+            var from = Math.max(0, idx - 3);
+            var to = Math.min(currentLines.length - 1, idx + 3);
+            var html = '';
+            for (var i = from; i <= to; i++) {
+                html += '<p class="lyrics-line' + (i === idx ? ' is-current' : '') + '">' +
+                    escapeHtml(currentLines[i].text) + '</p>';
+            }
+            railBody.innerHTML = html;
+        }
+
+        function syncLyrics() {
+            if (!rail || rail.hidden || !currentLines.length) {
+                if (rail) { rail.setAttribute('data-lyr-now', 'skip hidden=' + rail.hidden + ' lines=' + currentLines.length); }
+                return;
+            }
+            var t = audio.currentTime + 0.3;
+            var idx = 0;
+            for (var i = 0; i < currentLines.length; i++) {
+                if (currentLines[i].t <= t) { idx = i; } else { break; }
+            }
+            rail.setAttribute('data-lyr-now', 'idx=' + idx + ' last=' + lastLineIdx + ' t=' + t.toFixed(1));
+            if (idx === lastLineIdx) { return; }
+            lastLineIdx = idx;
+            renderRail(idx);
+        }
+
+        function setupLyrics(song) {
+            if (!rail) { return; }
+            railDismissed = false;
+            loadLyrics(function () {
+                var lrc = '';
+                var parseErr = '';
+                try {
+                    lrc = lyricsMap ? (lyricsMap[song.id] || '') : '';
+                    currentLines = lrc ? parseLrc(lrc) : [];
+                } catch (e) {
+                    parseErr = String(e && e.message ? e.message : e);
+                    currentLines = [];
+                }
+                /* 诊断信息（排查歌词为什么没出来时很有用） */
+                rail.setAttribute('data-lyr', 'id=' + song.id +
+                    ' mapKeys=' + (lyricsMap ? Object.keys(lyricsMap).length : 'null') +
+                    ' lrcLen=' + (lrc ? lrc.length : 0) +
+                    ' lines=' + currentLines.length +
+                    ' times=' + currentLines.slice(0, 4).map(function (l) { return l.t.toFixed(1); }).join('/') +
+                    ' last=' + (currentLines.length ? currentLines[currentLines.length - 1].t.toFixed(1) : '-') +
+                    ' inner=' + window.innerWidth +
+                    ' dismissed=' + railDismissed +
+                    (parseErr ? ' err=' + parseErr : ''));
+                if (!currentLines.length || railDismissed || window.innerWidth < 1100) {
+                    rail.hidden = true;
+                    return;
+                }
+                if (railSongEl) {
+                    railSongEl.textContent = song.artist ? (song.name + ' · ' + song.artist) : song.name;
+                }
+                rail.hidden = false;
+                lastLineIdx = -1;
+                syncLyrics();
+            });
+        }
+
+        if (railClose) {
+            railClose.addEventListener('click', function () {
+                railDismissed = true;
+                if (rail) { rail.hidden = true; }
+            });
         }
 
         function tryPlay() {
@@ -214,8 +423,11 @@
             audio.src = OUTER + song.id + '.mp3';
             audio.load();
             say('正在播放 · ' + song.name);
-            if (fill) { fill.style.width = '0%'; }
             if (timeEl) { timeEl.textContent = '0:00'; }
+            lastLineIdx = -1;
+            setupLyrics(song);
+            sizeWave();
+            startWave();
             if (seekTo && seekTo > 1) {
                 var onMeta = function () {
                     audio.removeEventListener('loadedmetadata', onMeta);
@@ -237,6 +449,7 @@
         audio.addEventListener('playing', function () {
             failures = 0;
             panel.classList.add('is-playing');
+            startWave();
             persist();
         });
 
@@ -245,7 +458,7 @@
             persist();
         });
 
-        audio.addEventListener('timeupdate', paint);
+        audio.addEventListener('timeupdate', function () { paint(); syncLyrics(); });
         audio.addEventListener('loadedmetadata', paint);
         audio.addEventListener('ended', function () { step(1); });
 
@@ -272,21 +485,30 @@
             });
         }
 
-        if (bar) {
-            bar.addEventListener('click', function (e) {
+        if (wave) {
+            wave.addEventListener('click', function (e) {
                 var d = audio.duration;
                 if (!isFinite(d) || d <= 0) { return; }
-                var rect = bar.getBoundingClientRect();
+                var rect = wave.getBoundingClientRect();
                 var ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-                audio.currentTime = ratio * d;
+                try { audio.currentTime = ratio * d; } catch (err) { }
+                lastLineIdx = -1;
                 paint();
+                syncLyrics();
+                startWave();
             });
         }
 
         function openPanel(autoStart) {
             panel.hidden = false;
             btn.setAttribute('aria-expanded', 'true');
-            if (!audio.getAttribute('src')) { loadSong(autoStart !== false, savedTime); }
+            if (!audio.getAttribute('src')) {
+                loadSong(autoStart !== false, savedTime);
+            } else {
+                setupLyrics(SONGS[songIdx]);
+                sizeWave();
+                startWave();
+            }
             spawnNote();
             if (!timer) { timer = window.setInterval(spawnNote, 620); }
             persist();
@@ -314,6 +536,19 @@
         } catch (e) { }
 
         window.addEventListener('pagehide', persist);
+
+        /* 窗口尺寸变化：重算波形画布；窄屏隐藏歌词栏 */
+        window.addEventListener('resize', function () {
+            sizeWave();
+            if (rail && !rail.hidden && window.innerWidth < 1100) { rail.hidden = true; }
+            if (rail && rail.hidden && !railDismissed && currentLines.length && window.innerWidth >= 1100) {
+                rail.hidden = false;
+                lastLineIdx = -1;
+                syncLyrics();
+            }
+            startWave();
+        });
+        sizeWave();
     }());
     </script>
 </nav>

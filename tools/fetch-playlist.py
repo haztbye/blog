@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""抓取网易云公开歌单，生成 data/music.yaml（播放器用）
+"""抓取网易云公开歌单，生成 data/music.yaml + static/music-lyrics.json（播放器用）
 
 - 只保留**真的能匿名播放**的曲目：先跳过 fee=1 的 VIP，再实测外链音频地址
   （VIP / 下架的歌会跳到 404 页面）
+- 顺手抓每个曲目的 LRC 歌词（带时间轴），写进 static/music-lyrics.json 供右侧歌词栏用
 - 抓取失败时保留旧文件并正常退出，绝不让部署挂掉
 - 歌单 ID 可用环境变量 NETEASE_PLAYLIST_ID 覆盖，默认见下方
 """
@@ -13,16 +14,31 @@ import os
 import sys
 import urllib.request
 
-PLAYLIST_ID = os.environ.get("NETEASE_PLAYLIST_ID", "2713947365")
+PLAYLIST_ID = os.environ.get("NETEASE_PLAYLIST_ID", "18521514782")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "music.yaml")
+LYRICS_OUT = os.path.join(ROOT, "static", "music-lyrics.json")
 API = "https://music.163.com/api/v6/playlist/detail?id=%s&n=1000"
 OUTER = "https://music.163.com/song/media/outer/url?id=%s.mp3"
+LYRIC_API = "https://music.163.com/api/song/lyric?id=%s&lv=1&kv=1&tv=-1"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
     "Referer": "https://music.163.com/",
 }
+
+
+def fetch_lyrics(song_id):
+    """取 LRC 歌词（带时间轴）；纯音乐 / 无歌词返回空串"""
+    req = urllib.request.Request(LYRIC_API % song_id, headers=HEADERS)
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.load(resp)
+    except Exception:
+        return ""
+    text = (data.get("lrc") or {}).get("lyric") or ""
+    # 至少要有一行带时间轴，否则视为没有歌词
+    return text if ("[0" in text or "[1" in text) else ""
 
 
 def playable(song_id):
@@ -92,8 +108,18 @@ def main():
     with open(OUT, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(lines) + "\n")
 
+    # 歌词：单独放一个 JSON，页面播放时按需 fetch（不塞进 HTML，省首屏体积）
+    lyrics = {}
+    for song in songs:
+        text = fetch_lyrics(song["id"])
+        if text:
+            lyrics[song["id"]] = text
+    with open(LYRICS_OUT, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps(lyrics, ensure_ascii=False, separators=(",", ":")) + "\n")
+
     print("[music] 写入 %d 首可播放曲目（跳过 VIP %d 首、外链失效 %d 首）-> %s"
           % (len(songs), skipped_vip, skipped_dead, OUT))
+    print("[music] 歌词 %d/%d 首 -> %s" % (len(lyrics), len(songs), LYRICS_OUT))
     return 0
 
 
