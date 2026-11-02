@@ -3732,3 +3732,121 @@ body.template-flower .main-container {
     }
 }
 
+
+/* ==========================================================================
+   22. 首页倒计时（27 / 28 考研；过了日期自动显示「已过去 N 天」）
+   ========================================================================== */
+
+.countdown {
+    margin-bottom: 30px;
+    padding: 18px 22px 20px;
+    border-radius: 20px;
+    background-color: var(--tw-glass-bg);
+    -webkit-backdrop-filter: var(--tw-glass-blur);
+    backdrop-filter: var(--tw-glass-blur);
+    border: 1px solid var(--tw-glass-border);
+    box-shadow: var(--tw-shadow-card);
+}
+
+.countdown-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.countdown-title {
+    margin: 0;
+    font-family: var(--tw-font-display);
+    font-size: 1.7rem;
+    letter-spacing: 0.18em;
+    color: var(--card-text-color-main);
+}
+
+.countdown-note {
+    font-size: 1.18rem;
+    letter-spacing: 0.04em;
+    color: var(--card-text-color-tertiary);
+}
+
+.countdown-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.countdown-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 1.26rem;
+    background-color: var(--sketch-paper-strong);
+    border: 1px solid var(--tw-glass-border);
+}
+
+.countdown-label {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--card-text-color-main);
+}
+
+.countdown-date {
+    font-size: 1.1rem;
+    color: var(--card-text-color-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.countdown-value {
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--card-text-color-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* 最近一场：季节色高亮 */
+.countdown-item.is-upcoming {
+    border-color: color-mix(in srgb, var(--season-accent) 45%, transparent);
+}
+
+.countdown-item.is-upcoming .countdown-value {
+    color: var(--season-accent);
+}
+
+.countdown-item.is-today {
+    background-color: color-mix(in srgb, var(--season-accent) 18%, var(--sketch-paper-strong));
+    border-color: var(--season-accent);
+}
+
+.countdown-item.is-today .countdown-value {
+    color: var(--season-accent);
+}
+
+.countdown-item.is-past {
+    opacity: 0.62;
+}
+
+.countdown-item.is-past .countdown-value {
+    color: var(--card-text-color-tertiary);
+    font-weight: 600;
+}
+
+@media (max-width: 760px) {
+    .countdown {
+        padding: 16px 16px 18px;
+    }
+
+    .countdown-title {
+        font-size: 1.5rem;
+    }
+
+    .countdown-item {
+        font-size: 1.18rem;
+        padding: 7px 12px;
+    }
+}

@@ -277,6 +277,27 @@
         </p>
     </section>
 
+    {{- with .Site.Params.countdown -}}
+        {{- if .enable -}}
+    <section class="countdown" id="countdown" aria-label="考研倒计时">
+        <div class="countdown-head">
+            <h2 class="countdown-title">{{ default "倒计时" .title }}</h2>
+            {{- with .note -}}<span class="countdown-note">{{ . }}</span>{{- end -}}
+        </div>
+        <ul class="countdown-list">
+            {{- range .items -}}
+            <li class="countdown-item" data-label="{{ .label }}" data-date="{{ .date }}">
+                <span class="countdown-label">{{ .label }}</span>
+                <span class="countdown-date">{{ .date }}</span>
+                <span class="countdown-value">—</span>
+            </li>
+            {{- end -}}
+        </ul>
+    </section>
+    <script src="{{ "js/countdown.js" | relURL }}" defer></script>
+        {{- end -}}
+    {{- end -}}
+
     <header class="home-latest-header">
         <h2 class="home-section-title">最近写下的</h2>
         <p class="home-section-desc">慢慢更新，慢慢变好。</p>
