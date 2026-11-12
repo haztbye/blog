@@ -30,7 +30,9 @@ jobs:
       SSH_HOST: ${{ secrets.SERVER_HOST }}
       SSH_USER: ${{ secrets.SERVER_USER }}
       SSH_PORT: ${{ secrets.SERVER_PORT || '22' }}
-      DEPLOY_PATH: /www/wwwroot/huanhe.site
+      # 迁移期兼容：SERVER_HOST 还是旧服务器（火山引擎/宝塔）时用 /www/wwwroot，
+      # 改成新服务器（腾讯云/Ubuntu）后自动切到 /var/www。切换 secret 即完成搬家，无需再改这里。
+      DEPLOY_PATH: ${{ contains(secrets.SERVER_HOST, '42.192.36.191') && '/var/www/huanhe.site' || '/www/wwwroot/huanhe.site' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -79,4 +81,4 @@ jobs:
             public/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
 
           ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "chown -R www:www $DEPLOY_PATH 2>/dev/null; chmod -R 755 $DEPLOY_PATH 2>/dev/null; echo DEPLOY_DONE"
+            "chown -R www-data:www-data $DEPLOY_PATH 2>/dev/null || chown -R www:www $DEPLOY_PATH 2>/dev/null; chmod -R 755 $DEPLOY_PATH 2>/dev/null; echo DEPLOY_DONE"
