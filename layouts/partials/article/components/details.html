@@ -1,9 +1,12 @@
 {{- /*
   站点级覆盖主题的 article/components/details.html：
   阅读时长改为「中文字数 / 350 每分钟」。
-  主题默认的 .ReadingTime 按英文分词计算，中文长句会被当成一个词，
-  导致 6000 字的文章只显示几分钟（严重低估）。
-  这里用 RawContent 去掉 ASCII 后统计非 ASCII（中文）字符数。
+  主题默认的 .ReadingTime 按英文分词计算（中文标点/长句会被算得很奇怪），
+  所以这里自己数：去掉 ASCII 与空白后统计中文（非 ASCII）字符。
+
+  ⚠️ 必须用 strings.RuneCount，不能用 len：
+     len 对字符串返回的是 **字节数**，一个汉字 UTF-8 占 3 字节，
+     会把阅读时长放大到约 3 倍（曾经因此显示 4877 字的文章要读 25 分钟）。
 */ -}}
 <div class="article-details">
     {{ if .Params.categories }}
@@ -46,7 +49,8 @@
 
         {{ if $showReadingTime }}
             {{- $cjk := replaceRE "[[:ascii:][:space:]]" "" .RawContent -}}
-            {{- $minutes := div (add (len $cjk) 349) 350 -}}
+            {{- $chars := strings.RuneCount $cjk -}}
+            {{- $minutes := div (add $chars 349) 350 -}}
             {{- if lt $minutes 1 }}{{ $minutes = 1 }}{{ end -}}
             <div>
                 {{ partial "helper/icon" "clock" }}
